@@ -91,13 +91,13 @@ local function GetFrame(type, parent)
         edgeSize = 16,
         insets = { left = 4, right = 4, top = 4, bottom = 4 }
       })
-      frame:SetBackdropBorderColor(1, 0.82, 0, 1) -- Default Gold
+      frame:SetBackdropBorderColor(1, 0.82, 0, 1) -- Default Gold (Handled in UpdateTheme)
       frame:SetBackdropColor(0.2, 0.2, 0.2, 0.9)  -- Dark BG
 
       frame.Title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
       Theme:ApplyFont(frame.Title, "Bold", 14)
       frame.Title:SetPoint("TOPLEFT", 10, -10)
-      frame.Title:SetTextColor(1, 0.82, 0) -- Gold Title
+      -- frame.Title:SetTextColor(1, 0.82, 0) -- Gold Title (Handled in UpdateTheme)
 
       frame.Text = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
       Theme:ApplyFont(frame.Text, "Normal", 12)
@@ -110,11 +110,7 @@ local function GetFrame(type, parent)
       frame.Button:SetSize(200, 30)
 
       -- Custom button style for callout
-      frame.Button.customColors = {
-        normal = { 1, 0.82, 0, 1 },         -- Gold
-        hover = { 1, 0.9, 0.2, 1 },         -- Lighter Gold
-        selected = { 0.8, 0.6, 0, 1 }       -- Darker Gold
-      }
+      -- frame.Button.customColors = { ... } -- Handled in UpdateTheme
       Theme:UpdateButtonState(frame.Button) -- Apply immediately
 
       -- Force Text Color to Black always (since gold button needs black text)
@@ -129,10 +125,17 @@ local function GetFrame(type, parent)
       frame.UpdateTheme = function(self)
         Theme:ApplyFont(self.Title, "Bold", 14)
         Theme:ApplyFont(self.Text, "Normal", 12)
-        -- Callout button is already themed/registered via CreateThemedButton,
-        -- but its colors are manually overridden in RenderItem usually.
-        -- We might need to persist those overrides or let them be custom?
-        -- For now, let's just ensure fonts update.
+
+        -- Apply colors based on severity
+        local severity = self.severity or "info"
+        local r, g, b = Theme:GetAlertColor(severity)
+
+        self:SetBackdropBorderColor(r, g, b, 1)
+        self.Title:SetTextColor(r, g, b)
+
+        -- Button
+        self.Button.customColors = Theme:GetButtonColorsForAlert(severity)
+        Theme:UpdateButtonState(self.Button)
       end
       Theme:RegisterT(frame)
     else
@@ -333,9 +336,14 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
   elseif item.type == "callout" then
     frame.Button:SetScript("OnClick", item.onButtonClick)
     -- Styling overrides from item?
-    if item.style == "warning" then
-      frame:SetBackdropBorderColor(1, 0.82, 0, 1)
+    if item.style or item.severity then
+      frame.severity = item.style or item.severity
+    else
+      frame.severity = "info" -- default
     end
+
+    -- Force update to apply severity colors
+    if frame.UpdateTheme then frame:UpdateTheme() end
   end
 
 

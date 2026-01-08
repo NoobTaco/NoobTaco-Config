@@ -59,6 +59,14 @@ local schema = {
             type = "button",
             label = "Reset",
             onClick = function() print("Reset!") end
+        },
+        {
+            type = "callout",
+            title = "Import Required",
+            text = "You must import a profile to continue.",
+            buttonText = "Import Now",
+            style = "warning", -- Use "warning", "info", "success", or "error"
+            onButtonClick = function() print("Import Clicked") end
         }
     }
 }

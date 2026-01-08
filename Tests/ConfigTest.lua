@@ -73,8 +73,24 @@ function ConfigTest:RenderContent(parent)
         text =
         "To ensure NoobTacoUI works as intended, you MUST import the optimized layout. Click the button, copy the string (CTRL+C), then open WoW Edit Mode and click 'Import'. We recommend naming the profile 'NoobTacoUI', but you can use any name you prefer.",
         buttonText = "GET IMPORT STRING",
-        style = "Information",
+        style = "INFO",
         onButtonClick = function() print("Get Import String Clicked") end
+      },
+      {
+        type = "callout",
+        title = "STEP 3: SUCCESS EXAMPLE",
+        text = "This is a success callout. It should be green.",
+        buttonText = "SUCCESS BUTTON",
+        style = "success",
+        onButtonClick = function() print("Success Clicked") end
+      },
+      {
+        type = "callout",
+        title = "STEP 4: ERROR EXAMPLE",
+        text = "This is an error callout. It should be red.",
+        buttonText = "ERROR BUTTON",
+        style = "error",
+        onButtonClick = function() print("Error Clicked") end
       },
 
       { type = "header", label = "Theme Testing" },

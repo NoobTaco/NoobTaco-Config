@@ -98,6 +98,26 @@ function Theme:GetAlertColor(severity)
   return unpack(color)
 end
 
+function Theme:GetButtonColorsForAlert(severity)
+  local r, g, b, a = self:GetAlertColor(severity)
+
+  -- Calculate hover (lighter)
+  -- Mix with white for better visibility on bright colors
+  local function mix(v1, v2, alpha) return v1 * (1 - alpha) + v2 * alpha end
+  local function clamp(v) return math.min(1, math.max(0, v)) end
+  local rh, gh, bh = mix(r, 1, 0.3), mix(g, 1, 0.3), mix(b, 1, 0.3)
+
+  -- Calculate selected (darker)
+  local rs, gs, bs = clamp(r - 0.2), clamp(g - 0.2), clamp(b - 0.2)
+
+  return {
+    normal = { r, g, b, 1 },
+    hover = { rh, gh, bh, 1 },
+    selected = { rs, gs, bs, 1 },
+    text = { 0, 0, 0, 1 } -- Always black for alert buttons as they are usually bright
+  }
+end
+
 function Theme:UpdateButtonState(btn)
   local state = (btn.isSelected and "selected" or (btn.isHover and "hover" or "normal"))
   local r, g, b, a
