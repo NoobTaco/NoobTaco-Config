@@ -11,6 +11,7 @@
 - **Media Dropdown**: New widget type `media` featuring a custom dropdown with audio preview capabilities.
 - **Audio Preview**: Integrated `PlaySoundFile` support in media dropdowns with a custom "Music Note" icon and "Play Sample" tooltip.
 - **About Tab**: Integrated schema rendering support for the About tab in `ConfigTest` including text block support.
+- **Expandable Lists**: New `expandable` component type for creating collapsible sections (e.g. for Profiles or Plugins). Supports status badges, nested content indentation, and custom sizing.
 
 ### Fixed
 - **Callout Button Hover**: Fixed an issue where custom-colored buttons would revert to default theme colors on mouse leave.

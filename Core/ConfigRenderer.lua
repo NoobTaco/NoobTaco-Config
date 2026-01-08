@@ -191,6 +191,54 @@ local function GetFrame(type, parent)
         Theme:UpdateButtonState(self.Button)
       end
       Theme:RegisterT(frame)
+    elseif type == "expandable" then
+      frame = CreateFrame("Button", nil, parent, "BackdropTemplate")
+      frame:SetBackdrop({
+        bgFile = "Interface/Buttons/WHITE8X8",
+        edgeFile = "Interface/Buttons/WHITE8X8",
+        edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+      })
+      frame:SetBackdropColor(0.15, 0.15, 0.2, 1) -- Slightly lighter/bluish dark
+      frame:SetBackdropBorderColor(0.3, 0.3, 0.3, 1)
+
+      frame.Title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+      Theme:ApplyFont(frame.Title, "Bold", 13)
+      frame.Title:SetPoint("LEFT", 10, 0)
+      frame.Title:SetTextColor(0.6, 0.7, 0.8) -- Blue/Grey
+
+      -- Expand/Collapse Icon
+      frame.Icon = frame:CreateTexture(nil, "ARTWORK")
+      frame.Icon:SetSize(16, 16)
+      frame.Icon:SetPoint("RIGHT", -10, 0)
+      frame.Icon:SetTexture("Interface/Buttons/UI-PlusButton-Up")
+
+      -- Status Badge
+      frame.Status = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+      Theme:ApplyFont(frame.Status, "Bold", 10)
+      frame.Status:SetPoint("RIGHT", frame.Icon, "LEFT", -10, 0)
+      frame.Status:SetTextColor(0.5, 0.5, 0.5)
+
+      -- Highlight
+      frame.hl = frame:CreateTexture(nil, "HIGHLIGHT")
+      frame.hl:SetAllPoints()
+      frame.hl:SetColorTexture(1, 1, 1, 0.05)
+
+      -- Theme Update for Expandable
+      frame.UpdateTheme = function(self)
+        Theme:ApplyFont(self.Title, "Bold", 13)
+        Theme:ApplyFont(self.Status, "Bold", 10)
+
+        -- Use Button colors for consistent "clickable" look, but slightly transparent/different if needed
+        -- Or just use hardcoded lighter value if Theme doesn't have a specific "Section" color
+        -- We'll try to map to button_normal for collapsed, button_hover for expanded (initially handled in Render logic, but should be here too)
+
+        local r, g, b = Theme:GetColor("button_normal")
+        -- Make it a bit lighter than standard button? Or just consistent.
+        -- Let's stick to the Render logic for state, but maybe we can use helper here?
+        -- Actually, Render sets the color based on 'expanded' state. We should perhaps respect that here or let Render handle it.
+        -- For now, we'll let Render handle the color toggle, this UpdateTheme just handles Fonts.
+      end
     else
       frame = CreateFrame("Frame", nil, parent)
     end
@@ -202,7 +250,7 @@ local function GetFrame(type, parent)
       frame.UpdateTheme = function(self)
         local severity = self.severity or "info"
         local r, g, b, a = Theme:GetAlertColor(severity)
-        self.bg:SetColorTexture(r, g, b, 0.5)
+        self.bg:SetColorTexture(r, g, b, 0.2)
         self.text:SetTextColor(r, g, b, 1)
         Theme:ApplyFont(self.text, "Normal", 12)
       end
@@ -275,6 +323,8 @@ function ConfigRenderer:Clear(container)
 end
 
 function ConfigRenderer:Render(schema, container)
+  self.currentSchema = schema
+  self.currentContainer = container
   self:Clear(container)
 
   local content = container.ContentChild
@@ -313,6 +363,10 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
       frame.text:SetText(item.label)
     elseif item.type == "button" then
       frame.Text:SetText(item.label)
+      if item.customColors then
+        frame.customColors = item.customColors
+        Theme:UpdateButtonState(frame)
+      end
     end
   end
 
@@ -320,6 +374,36 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
     frame.Title:SetText(item.title)
     frame.Text:SetText(item.text)
     frame.Button.Text:SetText(item.buttonText or "Click Me")
+  end
+
+  if item.type == "expandable" then
+    frame.Title:SetText(item.label)
+    if item.status then
+      frame.Status:SetText(item.status)
+      frame.Status:Show()
+    else
+      frame.Status:Hide()
+    end
+
+    if item.expanded then
+      frame.Icon:SetTexture("Interface/Buttons/UI-MinusButton-Up")
+      -- Lighter background for expanded
+      local r, g, b = 0.25, 0.25, 0.25 -- Manual lighten
+      if Theme then
+        local tr, tg, tb = Theme:GetColor("button_hover")
+        r, g, b = tr, tg, tb
+      end
+      frame:SetBackdropColor(r, g, b, 1)
+    else
+      frame.Icon:SetTexture("Interface/Buttons/UI-PlusButton-Up")
+      -- Standard background for collapsed
+      local r, g, b = 0.2, 0.2, 0.2
+      if Theme then
+        local tr, tg, tb = Theme:GetColor("button_normal")
+        r, g, b = tr, tg, tb
+      end
+      frame:SetBackdropColor(r, g, b, 1)
+    end
   end
 
   -- State Binding & Actions
@@ -487,6 +571,11 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
 
     -- Force update to apply severity colors
     if frame.UpdateTheme then frame:UpdateTheme() end
+  elseif item.type == "expandable" then
+    frame:SetScript("OnClick", function()
+      item.expanded = not item.expanded
+      self:Render(self.currentSchema, self.currentContainer)
+    end)
   end
 
 
@@ -549,6 +638,12 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
       PixelUtil.SetSize(frame, w, h)
     else
       frame:SetSize(w, h)
+    end
+  elseif item.type == "expandable" then
+    if PixelUtil then
+      PixelUtil.SetSize(frame, cursor.maxWidth, 30)
+    else
+      frame:SetSize(cursor.maxWidth, 30)
     end
   else
     -- Basic sizing
@@ -615,4 +710,32 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
   -- Update Cursor
   cursor.x = cursor.x + effectiveWidth + padding
   cursor.rowHeight = math.max(cursor.rowHeight, effectiveHeight)
+
+  -- Specific Logic for Expandable Children
+  if item.type == "expandable" and item.expanded and item.children then
+    -- Force new row for children
+    cursor.x = 10
+    cursor.y = cursor.y - cursor.rowHeight - 5
+    cursor.rowHeight = 0
+
+    -- Indent
+    local indent = 30
+    local childCursor = {
+      x = cursor.x + indent,
+      y = cursor.y,
+      rowHeight = 0,
+      maxWidth = cursor.maxWidth - indent
+    }
+
+    -- Background for content?
+    -- Currently just rendering in flow.
+    for _, child in ipairs(item.children) do
+      self:RenderItem(child, parent, childCursor)
+    end
+
+    -- Recover cursor for next sibling item
+    cursor.y = childCursor.y - 10 -- Add Buffer Padding after children
+    cursor.rowHeight = 0
+    cursor.x = 10
+  end
 end

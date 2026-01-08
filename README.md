@@ -67,6 +67,16 @@ local schema = {
             buttonText = "Import Now",
             style = "warning", -- Use "warning", "info", "success", or "error"
             onButtonClick = function() print("Import Clicked") end
+        },
+        {
+            type = "expandable",
+            label = "Expandable Section",
+            status = "Status Badge", -- Optional
+            expanded = false,        -- Initial state
+            children = {
+                 { type = "description", text = "Nested content goes here." },
+                 { type = "button", label = "Action", onClick = function() end }
+            }
         }
     }
 }

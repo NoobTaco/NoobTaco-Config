@@ -171,13 +171,88 @@ function ConfigTest:RenderContent(parent)
         id = "selectedSound",
         type = "media",
         label = "Notification Sound",
-        default = "Sound\\Interface\\RaidWarning.ogg",  -- Default Sound
+        default = "Sound\\Interface\\RaidWarning.ogg", -- Default Sound
         options = {
           { label = "Raid Warning",        value = "Sound\\Interface\\RaidWarning.ogg" },
           { label = "Level Up",            value = "Sound\\Interface\\LevelUp.ogg" },
           { label = "Auction Window Open", value = "Sound\\Interface\\AuctionWindowOpen.ogg" },
           { label = "Murloc",              value = "Sound\\Creature\\Murloc\\mMurlocAggroOld.ogg" },
         }
+      }
+    }
+  }
+
+  local ProfilesSchema = {
+    type = "group",
+    children = {
+      { type = "header", label = "INDIVIDUAL ADDON PROFILES" },
+      {
+        type = "expandable",
+        label = "BetterBlizzFrames",
+        expanded = false,
+        children = {
+          { type = "description", text = "Profile content for BetterBlizzFrames would go here." }
+        }
+      },
+      {
+        type = "expandable",
+        label = "Cooldown Manager Tweaks",
+        status = "NOT LOADED",
+        expanded = true,
+        children = {
+          {
+            type = "description",
+            text =
+            "Import a pre-configured profile for Cooldown Manager Tweaks that complements the NoobTacoUI aesthetic. This profile includes optimized tracker styling and positioning."
+          },
+          {
+            type = "description",
+            text =
+            "|cff80ff00Instructions:|r\n1. Click the button below to copy the profile string\n2. Type |cffffcc00/cmt|r in chat to open Cooldown Manager Tweaks config\n3. Navigate to the |cffffcc00Profiles|r section..."
+          },
+          {
+            type = "row",
+            children = {
+              {
+                type = "button",
+                label = "Copy Profile String",
+                width = 200,
+                customColors = {
+                  normal = { 0.3, 0.6, 0.7, 1 }, -- Lighter Blue/Teal
+                  hover = { 0.4, 0.7, 0.8, 1 },
+                  selected = { 0.2, 0.5, 0.6, 1 },
+                  text = { 1, 1, 1, 1 }
+                },
+                onClick = function() print("Copied CMT Profile") end
+              },
+              {
+                type = "button",
+                label = "Get Addon Link",
+                width = 200,
+                customColors = {
+                  normal = { 0.3, 0.3, 0.35, 1 }, -- Lighter Grey/Blue
+                  hover = { 0.4, 0.4, 0.45, 1 },
+                  selected = { 0.2, 0.2, 0.25, 1 },
+                  text = { 1, 1, 1, 1 }
+                },
+                onClick = function() print("Link: https://curseforge.com/...") end
+              }
+            }
+          }
+        }
+      },
+      {
+        type = "expandable",
+        label = "Details! Damage Meter",
+        status = "NOT LOADED",
+        expanded = false,
+        children = {}
+      },
+      {
+        type = "expandable",
+        label = "Platynator",
+        expanded = false,
+        children = {}
       }
     }
   }
@@ -204,6 +279,9 @@ function ConfigTest:RenderContent(parent)
     -- Populate Sidebar
     AddOn.ConfigLayout:AddSidebarButton(layout, "general", "General Settings", function()
       AddOn.ConfigRenderer:Render(GeneralSchema, layout)
+    end)
+    AddOn.ConfigLayout:AddSidebarButton(layout, "profiles", "Profiles", function()
+      AddOn.ConfigRenderer:Render(ProfilesSchema, layout)
     end)
     AddOn.ConfigLayout:AddSidebarButton(layout, "advanced", "Advanced", function()
       AddOn.ConfigRenderer:Render(AdvancedSchema, layout)
