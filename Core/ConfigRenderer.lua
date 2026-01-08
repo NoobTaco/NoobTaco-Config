@@ -229,6 +229,54 @@ local function GetFrame(type, parent)
         Theme:ApplyFont(self.Title, "Bold", 13)
         Theme:ApplyFont(self.Status, "Bold", 10)
       end
+    elseif type == "about" then
+      frame = CreateFrame("Frame", nil, parent, "BackdropTemplate")
+      frame:SetBackdrop({
+        bgFile = "Interface/Buttons/WHITE8X8",
+        edgeFile = "Interface/Buttons/WHITE8X8",
+        edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+      })
+      frame:SetBackdropColor(0.1, 0.1, 0.1, 0.5)
+      frame:SetBackdropBorderColor(0, 0, 0, 1)
+
+      -- Icon
+      frame.Icon = frame:CreateTexture(nil, "ARTWORK")
+      frame.Icon:SetSize(64, 64)
+      frame.Icon:SetPoint("TOPLEFT", 10, -10)
+
+      -- Title
+      frame.Title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalHuge")
+      Theme:ApplyFont(frame.Title, "Bold", 24)
+      frame.Title:SetPoint("TOPLEFT", frame.Icon, "TOPRIGHT", 15, -5)
+      frame.Title:SetTextColor(1, 1, 1)
+
+      -- Version
+      frame.Version = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+      Theme:ApplyFont(frame.Version, "Normal", 12)
+      frame.Version:SetPoint("BOTTOMLEFT", frame.Title, "BOTTOMRIGHT", 5, 2)
+      frame.Version:SetTextColor(0.6, 0.6, 0.6)
+
+      -- Description
+      frame.Description = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+      Theme:ApplyFont(frame.Description, "Normal", 12)
+      frame.Description:SetPoint("TOPLEFT", frame.Title, "BOTTOMLEFT", 0, -10)
+      frame.Description:SetPoint("RIGHT", -10, 0)
+      frame.Description:SetJustifyH("LEFT")
+      frame.Description:SetJustifyV("TOP")
+      frame.Description:SetWordWrap(true)
+
+      -- Link Container
+      frame.Links = CreateFrame("Frame", nil, frame)
+      frame.Links:SetPoint("TOPLEFT", frame.Icon, "BOTTOMLEFT", 0, -15)
+      frame.Links:SetSize(1, 30)
+
+      frame.UpdateTheme = function(self)
+        Theme:ApplyFont(self.Title, "Bold", 24)
+        Theme:ApplyFont(self.Version, "Normal", 12)
+        Theme:ApplyFont(self.Description, "Normal", 12)
+        self.Title:SetTextColor(Theme:GetColor("header"))
+      end
     else
       frame = CreateFrame("Frame", nil, parent)
     end
@@ -634,6 +682,101 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
       PixelUtil.SetSize(frame, cursor.maxWidth, 30)
     else
       frame:SetSize(cursor.maxWidth, 30)
+    end
+  elseif item.type == "about" then
+    -- Populate Data
+    if item.icon then
+      frame.Icon:SetTexture(item.icon)
+      frame.Icon:Show()
+    else
+      frame.Icon:Hide()
+    end
+
+    frame.Title:SetText(item.title or "NoobTacoUI")
+    frame.Version:SetText(item.version or "")
+    frame.Description:SetText(item.description or "")
+
+    local width = cursor.maxWidth
+    frame:SetWidth(width)
+
+    -- Description width depends on if icon is present?
+    -- Simplified: Title/Desc to right of Icon.
+
+    local iconSize = 64
+    local contentLeft = 10 + iconSize + 15
+    if not item.icon then contentLeft = 10 end
+
+    frame.Title:SetPoint("TOPLEFT", contentLeft, -10)
+    frame.Description:SetPoint("TOPLEFT", contentLeft, -45) -- Approx below Title
+    frame.Description:SetWidth(width - contentLeft - 10)
+
+    local descHeight = frame.Description:GetStringHeight()
+
+    -- Links
+    local linkHeight = 0
+    if item.links then
+      linkHeight = 30
+      frame.Links:Show()
+      frame.Links:ClearAllPoints()
+      -- Position links below Description or Icon, whichever is taller
+      local contentBottom = 45 + descHeight
+      local iconBottom = 10 + iconSize
+      local startY = math.max(contentBottom, iconBottom) + 15
+
+      frame.Links:SetPoint("TOPLEFT", 10, -startY)
+      frame.Links:SetPoint("RIGHT", -10, 0)
+      frame.Links:SetHeight(30)
+
+      -- Clear old links
+      local kids = { frame.Links:GetChildren() }
+      for _, k in ipairs(kids) do
+        k:Hide(); k:ClearAllPoints()
+      end
+
+      -- Create new links
+      local numLinks = #item.links
+      local btnWidth = 100
+      local gap = 10
+      local totalLinkWidth = (numLinks * btnWidth) + ((numLinks - 1) * gap)
+      local availableWidth = width - 20 -- Padding
+      local startX = (availableWidth - totalLinkWidth) / 2
+
+      local lx = startX
+      for _, link in ipairs(item.links) do
+        local btn = Theme:CreateThemedButton(frame.Links)
+        if btn.Text then
+          btn.Text:SetText(link.label)
+        else
+          btn:SetText(link.label)
+        end
+
+        btn:SetSize(btnWidth, 24)
+        btn:SetPoint("LEFT", lx, 0)
+
+        -- Ensure style is updated
+        if Theme.UpdateButtonState then
+          Theme:UpdateButtonState(btn)
+        end
+
+        btn:SetScript("OnClick", function()
+          if link.url then
+            print("Opening Link: " .. link.url)
+            -- StaticPopup_Show("COPY_URL", nil, nil, link.url)
+          end
+        end)
+        lx = lx + btnWidth + gap
+      end
+    else
+      frame.Links:Hide()
+    end
+
+    local totalHeight = math.max(10 + iconSize, 45 + descHeight) + 20
+    if item.links then totalHeight = totalHeight + linkHeight + 10 end
+
+    if PixelUtil then
+      PixelUtil.SetSize(frame, width, totalHeight)
+    else
+      frame:SetSize(width, totalHeight)
     end
   else
     -- Basic sizing

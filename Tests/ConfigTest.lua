@@ -160,11 +160,18 @@ function ConfigTest:RenderContent(parent)
   local AboutSchema = {
     type = "group",
     children = {
-      { type = "header", label = "About NoobTaco Config" },
       {
-        type = "description",
-        text =
-        "This is a demo configuration library for NoobTacoUI. It provides a standardized way to build settings menus with a consistent look and feel.\n\nCreated by NoobTaco Development Team."
+        type = "about",
+        icon = "Interface\\AddOns\\NoobTacoUI\\Media\\Logo", -- Placeholder
+        title = "NoobTaco Config",
+        version = "v1.0.0",
+        description =
+        "This is a demo configuration library for NoobTacoUI. It provides a standardized way to build settings menus with a consistent look and feel.\n\nCreated by NoobTaco Development Team.",
+        links = {
+          { label = "Discord", url = "https://discord.gg/noobtaco" },
+          { label = "Patreon", url = "https://patreon.com/noobtaco" },
+          { label = "GitHub",  url = "https://github.com/noobtaco/config" },
+        }
       },
       { type = "header", label = "Media Test" },
       {

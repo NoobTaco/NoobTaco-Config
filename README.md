@@ -80,6 +80,18 @@ local schema = {
                  { type = "button", label = "Action", onClick = function() end }
             }
         }
+    -- ... other children
+        {
+             type = "about",
+             icon = "Interface\\AddOns\\YourAddOn\\Media\\Logo",
+             title = "Your AddOn",
+             version = "v1.0.0",
+             description = "A short description of your addon.",
+             links = {
+                { label = "Discord", url = "https://discord.gg/..." },
+                { label = "GitHub", url = "https://github.com/..." }
+             }
+        }
     }
 }
 ```
