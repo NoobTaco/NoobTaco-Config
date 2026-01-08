@@ -6,14 +6,14 @@ Theme.Current = "Default"
 local unpack = unpack
 
 Theme.Fonts = {
-  Normal = "Interface\\AddOns\\NoobTacoUI\\Media\\Fonts\\Poppins-Regular.ttf",
-  Bold = "Interface\\AddOns\\NoobTacoUI\\Media\\Fonts\\Poppins-SemiBold.ttf",
+  Normal = "Interface\\AddOns\\NoobTaco-Config\\Media\\Fonts\\Poppins-Regular.ttf",
+  Bold = "Interface\\AddOns\\NoobTaco-Config\\Media\\Fonts\\Poppins-SemiBold.ttf",
 }
 
 Theme.Presets = {
   Default = {
     background = { 0.1, 0.1, 0.1, 0.9 },
-    header = { 0.2, 0.2, 0.2, 1 },
+    header = { 1, 0.82, 0, 1 }, -- Gold (same as highlight)
     border = { 0.4, 0.4, 0.4, 1 },
     text = { 1, 1, 1, 1 },
     highlight = { 1, 0.82, 0, 1 },
@@ -32,14 +32,14 @@ Theme.Presets = {
   },
   Nord = {
     background = { 0.18, 0.20, 0.25, 0.95 }, -- Polar Night
-    header = { 0.23, 0.26, 0.32, 1 },
+    header = { 0.53, 0.75, 0.82, 1 },        -- Frost (same as highlight)
     border = { 0.37, 0.42, 0.49, 1 },
-    text = { 0.93, 0.94, 0.96, 1 },       -- Snow Storm
-    highlight = { 0.53, 0.75, 0.82, 1 },  -- Frost
+    text = { 0.93, 0.94, 0.96, 1 },          -- Snow Storm
+    highlight = { 0.53, 0.75, 0.82, 1 },     -- Frost
     button = {
-      normal = { 0.29, 0.33, 0.41, 1 },   -- Nord3
-      hover = { 0.37, 0.42, 0.49, 1 },    -- Nord3 Light
-      selected = { 0.53, 0.75, 0.82, 1 }, -- Frost
+      normal = { 0.29, 0.33, 0.41, 1 },      -- Nord3
+      hover = { 0.37, 0.42, 0.49, 1 },       -- Nord3 Light
+      selected = { 0.53, 0.75, 0.82, 1 },    -- Frost
       text = { 0.93, 0.94, 0.96, 1 },
     },
     alert = {
@@ -51,7 +51,7 @@ Theme.Presets = {
   },
   Catppuccin = {
     background = { 0.12, 0.12, 0.17, 0.95 }, -- Mocha Base
-    header = { 0.19, 0.20, 0.27, 1 },        -- Mantle
+    header = { 0.78, 0.65, 0.94, 1 },        -- Mauve (same as highlight)
     border = { 0.36, 0.38, 0.49, 1 },        -- Surface
     text = { 0.80, 0.84, 0.93, 1 },          -- Text
     highlight = { 0.78, 0.65, 0.94, 1 },     -- Mauve

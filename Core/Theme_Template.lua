@@ -15,7 +15,7 @@ local MyCustomTheme = {
   background = { 0.1, 0.1, 0.1, 0.9 },
 
   -- Header text color
-  header = { 0.2, 0.2, 0.2, 1 },
+  header = { 1, 0.82, 0, 1 },
 
   -- Border color for frames and inputs
   border = { 0.4, 0.4, 0.4, 1 },
