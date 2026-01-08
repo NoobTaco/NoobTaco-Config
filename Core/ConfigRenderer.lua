@@ -202,7 +202,7 @@ local function GetFrame(type, parent)
       frame.UpdateTheme = function(self)
         local severity = self.severity or "info"
         local r, g, b, a = Theme:GetAlertColor(severity)
-        self.bg:SetColorTexture(r, g, b, 0.2)
+        self.bg:SetColorTexture(r, g, b, 0.5)
         self.text:SetTextColor(r, g, b, 1)
         Theme:ApplyFont(self.text, "Normal", 12)
       end
