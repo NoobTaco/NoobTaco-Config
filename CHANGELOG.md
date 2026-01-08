@@ -13,6 +13,8 @@
 - **Callout Button Hover**: Fixed an issue where custom-colored buttons would revert to default theme colors on mouse leave.
 - **Blank Config Page**: Improved `ConfigTest` rendering logic to handle race conditions where `OnShow` fired before layout was ready.
 - **Header Visibility**: Increased brightness of Header text in default themes (using Highlight color) for better readability.
+- **Layout Padding**: Added internal padding to the configuration container to prevent content from touching window edges.
+- **Modern Scrollbar**: Replaced standard scrollbar with a thin, minimal slider-based scrollbar for a cleaner aesthetic.
 
 ## [1.0] - 2026-01-08
 - Initial Release

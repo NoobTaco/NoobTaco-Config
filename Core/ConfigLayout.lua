@@ -30,24 +30,81 @@ function ConfigLayout:CreateTwoColumnLayout(parent)
   sidebar.bg = sidebarBg
 
   -- Content (Right)
-  local content = CreateFrame("ScrollFrame", nil, container, "UIPanelScrollFrameTemplate")
-  content:SetPoint("TOPLEFT", sidebar, "TOPRIGHT", 0, 0)
-  content:SetPoint("BOTTOMRIGHT", container, "BOTTOMRIGHT", 0, 0)
+  -- Remove UIPanelScrollFrameTemplate to manually control scrollbar
+  local content = CreateFrame("ScrollFrame", nil, container)
+
+  -- Padding / Inset adjustment
+  content:SetPoint("TOPLEFT", sidebar, "TOPRIGHT", 10, -10)
+  content:SetPoint("BOTTOMRIGHT", container, "BOTTOMRIGHT", -30, 10) -- Right padding for scrollbar space
 
   local child = CreateFrame("Frame")
   child:SetSize(1, 1) -- Will auto-grow
   content:SetScrollChild(child)
 
-  -- Content Background
+  -- Content Background (Optional, maybe specific to content area)
   local contentBg = content:CreateTexture(nil, "BACKGROUND")
   contentBg:SetAllPoints()
   contentBg:SetColorTexture(0, 0, 0, 0.5) -- Placeholder
   content.bg = contentBg
 
+  -- Custom ScrollBar (Thin/Minimal Style using Slider)
+  -- Note: MinimalScrollBarTemplate usage caused modern ScrollUtil link errors.
+  -- We fallback to a manual slider implementation for maximum compatibility with vanilla/classic/modern.
+  local scrollBar = CreateFrame("Slider", nil, container)
+  scrollBar:SetPoint("TOPRIGHT", content, "TOPRIGHT", 25, 0) -- Outside content padding
+  scrollBar:SetPoint("BOTTOMRIGHT", content, "BOTTOMRIGHT", 25, 0)
+  scrollBar:SetWidth(6)
+
+  -- ScrollBar Visuals
+  local thumb = scrollBar:CreateTexture(nil, "OVERLAY")
+  thumb:SetColorTexture(0.4, 0.4, 0.4, 0.8)
+  thumb:SetSize(6, 30)
+  scrollBar:SetThumbTexture(thumb)
+
+  local bg = scrollBar:CreateTexture(nil, "BACKGROUND")
+  bg:SetAllPoints()
+  bg:SetColorTexture(0.1, 0.1, 0.1, 0.5)
+
+  -- Manual Scroll Wiring to avoid ScrollUtil compatibility issues
+  scrollBar:SetObeyStepOnDrag(true)
+  scrollBar:SetValueStep(1)
+
+  -- Link: ScrollBar -> ScrollFrame
+  scrollBar:SetScript("OnValueChanged", function(self, value)
+    content:SetVerticalScroll(value)
+  end)
+
+  -- Link: ScrollFrame -> ScrollBar
+  content:SetScript("OnScrollRangeChanged", function(self, xrange, yrange)
+    scrollBar:SetMinMaxValues(0, yrange)
+    if yrange > 0 then
+      local thumbHeight = math.max(20, (content:GetHeight() / (content:GetHeight() + yrange)) * content:GetHeight())
+      thumb:SetHeight(thumbHeight)
+      scrollBar:Show()
+    else
+      scrollBar:Hide()
+      scrollBar:SetValue(0)
+    end
+  end)
+
+  content:SetScript("OnVerticalScroll", function(self, offset)
+    scrollBar:SetValue(offset)
+  end)
+
+  content:SetScript("OnMouseWheel", function(self, delta)
+    local current = scrollBar:GetValue()
+    local step = 40 -- Scroll speed
+    scrollBar:SetValue(current - (delta * step))
+  end)
+
+  -- Ensure initial state
+  scrollBar:Hide()
+
   -- Store refs
   container.Sidebar = sidebar
   container.Content = content
   container.ContentChild = child
+  container.ScrollBar = scrollBar
 
   return container
 end
