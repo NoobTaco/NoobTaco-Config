@@ -42,10 +42,7 @@ function ConfigLayout:CreateTwoColumnLayout(parent)
   content:SetScrollChild(child)
 
   -- Content Background (Optional, maybe specific to content area)
-  local contentBg = content:CreateTexture(nil, "BACKGROUND")
-  contentBg:SetAllPoints()
-  contentBg:SetColorTexture(0, 0, 0, 0.5) -- Placeholder
-  content.bg = contentBg
+
 
   -- Custom ScrollBar (Thin/Minimal Style using Slider)
   -- Note: MinimalScrollBarTemplate usage caused modern ScrollUtil link errors.
