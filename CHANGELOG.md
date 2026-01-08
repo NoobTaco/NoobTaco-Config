@@ -13,9 +13,13 @@
 - **About Tab**: Integrated schema rendering support for the About tab in `ConfigTest` including text block support.
 - **Expandable Lists**: New `expandable` component type for creating collapsible sections (e.g. for Profiles or Plugins). Supports status badges, nested content indentation, and custom sizing.
 - **About Container**: New `about` widget type for displaying branding, version info, description, and support links in a standardized layout.
+- **Component Skinning**: Refactored `editbox`, `dropdown`, and `slider` components to use a thinner, 1-pixel border aesthetic, matching the media selector.
+- **Custom Dropdown**: Implemented a custom button-based dropdown to replace Blizzard's standard template for better styling control.
+- **Custom Slider**: Implemented a template-free slider with 1px borders and themed thumb textures.
 
 ### Fixed
 - **Callout Button Hover**: Fixed an issue where custom-colored buttons would revert to default theme colors on mouse leave.
+- **Side-by-Side Layout**: Adjusted default component widths to 180px and improved vertical spacing to ensure elements fit comfortably in multi-column rows.
 - **Blank Config Page**: Improved `ConfigTest` rendering logic to handle race conditions where `OnShow` fired before layout was ready.
 - **Header Visibility**: Increased brightness of Header text in default themes (using Highlight color) for better readability.
 - **Layout Padding**: Added internal padding to the configuration container to prevent content from touching window edges.

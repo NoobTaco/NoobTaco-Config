@@ -11,7 +11,7 @@ This library provides a way to generate WoW Interface Options panels dynamically
 - **Two-Column Layout**: Automatic sidebar navigation and content area.
 - **State Management**: Transactional state with commit/revert capabilities.
 - **Theming**: Built-in support for switching color themes (Default, Nord, Catppuccin) and fonts (Poppins).
-- **Custom Rendering**: "Pixel-perfect" rendering adjustments and custom flat styling for buttons.
+- **Custom Rendering**: "Pixel-perfect" rendering for all interactive components (EditBox, Dropdown, Slider, Media) with a consistent 1px border aesthetic.
 
 ## File Structure
 

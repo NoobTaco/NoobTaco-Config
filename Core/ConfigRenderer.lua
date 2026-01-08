@@ -19,20 +19,36 @@ local function GetFrame(type, parent)
       frame = CreateFrame("CheckButton", nil, parent, "ChatConfigCheckButtonTemplate")
       if frame.Text then Theme:ApplyFont(frame.Text, "Normal", 12) end
     elseif type == "slider" then
-      -- Give the slider a unique name so that label sub-elements from OptionsSliderTemplate are accessible
-      local frameName = "NoobTacoConfigSlider" .. (AddOn.SliderCount or 0)
-      AddOn.SliderCount = (AddOn.SliderCount or 0) + 1
-      frame = CreateFrame("Slider", frameName, parent, "OptionsSliderTemplate")
+      frame = CreateFrame("Slider", nil, parent, "BackdropTemplate")
+      frame:SetOrientation("HORIZONTAL")
+      frame:SetHeight(14) -- Thinner bar
+      frame:SetBackdrop({
+        bgFile = "Interface/Buttons/WHITE8X8",
+        edgeFile = "Interface/Buttons/WHITE8X8",
+        edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+      })
+      frame:SetBackdropBorderColor(0.5, 0.5, 0.5, 1)
+      frame:SetBackdropColor(0.1, 0.1, 0.1, 1)
 
-      -- Template usually creates these sub-elements:
-      -- $parentText, $parentLow, $parentHigh
-      frame.Text = _G[frameName .. "Text"]
-      frame.Low = _G[frameName .. "Low"]
-      frame.High = _G[frameName .. "High"]
+      -- Thumb
+      local thumb = frame:CreateTexture(nil, "ARTWORK")
+      thumb:SetSize(12, 12)
+      thumb:SetColorTexture(1, 0.82, 0) -- Default highlight color
+      frame:SetThumbTexture(thumb)
+      frame.Thumb = thumb
 
-      if frame.Text then Theme:ApplyFont(frame.Text, "Normal", 12) end
-      if frame.Low then Theme:ApplyFont(frame.Low, "Normal", 10) end
-      if frame.High then Theme:ApplyFont(frame.High, "Normal", 10) end
+      frame.Text = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+      Theme:ApplyFont(frame.Text, "Normal", 12)
+      frame.Text:SetPoint("BOTTOMLEFT", frame, "TOPLEFT", 0, 5)
+
+      frame.Low = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+      Theme:ApplyFont(frame.Low, "Normal", 10)
+      frame.Low:SetPoint("TOPLEFT", frame, "BOTTOMLEFT", 0, -2)
+
+      frame.High = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+      Theme:ApplyFont(frame.High, "Normal", 10)
+      frame.High:SetPoint("TOPRIGHT", frame, "BOTTOMRIGHT", 0, -2)
     elseif type == "button" then
       frame = Theme:CreateThemedButton(parent)
     elseif type == "alert" then
@@ -60,21 +76,75 @@ local function GetFrame(type, parent)
       frame.line:SetPoint("TOPLEFT", frame.text, "BOTTOMLEFT", 0, -5)
       frame.line:SetPoint("RIGHT", frame, "RIGHT", 0, 0)
     elseif type == "editbox" then
-      frame = CreateFrame("EditBox", nil, parent, "InputBoxTemplate")
+      frame = CreateFrame("EditBox", nil, parent, "BackdropTemplate")
       frame:SetAutoFocus(false)
+      frame:SetTextInsets(8, 8, 0, 0)
+      frame:SetBackdrop({
+        bgFile = "Interface/Buttons/WHITE8X8",
+        edgeFile = "Interface/Buttons/WHITE8X8",
+        edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+      })
+      frame:SetBackdropBorderColor(0.5, 0.5, 0.5, 1)
+      frame:SetBackdropColor(0.1, 0.1, 0.1, 1)
+
       frame.Label = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
       Theme:ApplyFont(frame.Label, "Normal", 12)
       -- EditBox is a FontInstance, apply directly
       Theme:ApplyFont(frame, "Normal", 12)
       frame.Label:SetPoint("BOTTOMLEFT", frame, "TOPLEFT", 0, 5)
     elseif type == "dropdown" then
-      frame = CreateFrame("Frame", nil, parent, "UIDropDownMenuTemplate")
-      UIDropDownMenu_SetWidth(frame, 150)
+      frame = CreateFrame("Button", nil, parent, "BackdropTemplate")
+      -- Custom Dropdown-like appearance matching 'media'
+      frame:SetBackdrop({
+        bgFile = "Interface/Buttons/WHITE8X8",
+        edgeFile = "Interface/Buttons/WHITE8X8",
+        edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+      })
+      frame:SetBackdropBorderColor(0.5, 0.5, 0.5, 1)
+      frame:SetBackdropColor(0.1, 0.1, 0.1, 1)
+
+      frame.Text = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+      Theme:ApplyFont(frame.Text, "Normal", 12)
+      frame.Text:SetPoint("LEFT", 8, 0)
+      frame.Text:SetPoint("RIGHT", -24, 0)
+      frame.Text:SetJustifyH("LEFT")
+
+      -- Chevron/Arrow
+      frame.Arrow = frame:CreateTexture(nil, "ARTWORK")
+      frame.Arrow:SetPoint("RIGHT", -6, 0)
+      frame.Arrow:SetSize(12, 12)
+      frame.Arrow:SetTexture("Interface/ChatFrame/ChatFrameExpandArrow")
+
       frame.Label = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
       Theme:ApplyFont(frame.Label, "Normal", 12)
-      -- Note: Dropdown text is managed by internal buttons, hard to skin without hooks
-      -- But we can try to hook standard template/helpers if needed later.
-      frame.Label:SetPoint("BOTTOMLEFT", frame, "TOPLEFT", 16, 5)
+      frame.Label:SetPoint("BOTTOMLEFT", frame, "TOPLEFT", 0, 5)
+
+      -- Popup Frame (similar to media)
+      frame.Popup = CreateFrame("Frame", nil, frame, "BackdropTemplate")
+      frame.Popup:SetPoint("TOPLEFT", frame, "BOTTOMLEFT", 0, -2)
+      frame.Popup:SetPoint("TOPRIGHT", frame, "BOTTOMRIGHT", 0, -2)
+      frame.Popup:SetHeight(200)
+      frame.Popup:SetBackdrop({
+        bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+        edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+        tile = true,
+        tileSize = 16,
+        edgeSize = 16,
+        insets = { left = 4, right = 4, top = 4, bottom = 4 }
+      })
+      frame.Popup:SetBackdropColor(0.1, 0.1, 0.1, 0.95)
+      frame.Popup:SetFrameStrata("DIALOG")
+      frame.Popup:Hide()
+
+      frame.Popup.ScrollFrame = CreateFrame("ScrollFrame", nil, frame.Popup, "UIPanelScrollFrameTemplate")
+      frame.Popup.ScrollFrame:SetPoint("TOPLEFT", 5, -5)
+      frame.Popup.ScrollFrame:SetPoint("BOTTOMRIGHT", -26, 5)
+
+      frame.Popup.Content = CreateFrame("Frame", nil, frame.Popup.ScrollFrame)
+      frame.Popup.Content:SetSize(1, 1)
+      frame.Popup.ScrollFrame:SetScrollChild(frame.Popup.Content)
     elseif type == "colorpicker" then
       frame = CreateFrame("Button", nil, parent)
       frame:SetSize(20, 20)
@@ -319,17 +389,44 @@ local function GetFrame(type, parent)
           self.Text:SetTextColor(Theme:GetColor("text"))
         end
       end
+    elseif type == "editbox" then
+      frame.UpdateTheme = function(self)
+        Theme:ApplyFont(self.Label, "Normal", 12)
+        self.Label:SetTextColor(Theme:GetColor("text"))
+        Theme:ApplyFont(self, "Normal", 12)
+        self:SetTextColor(Theme:GetColor("text"))
+        local r, g, b = Theme:GetColor("border")
+        self:SetBackdropBorderColor(r, g, b, 1)
+      end
+    elseif type == "dropdown" then
+      frame.UpdateTheme = function(self)
+        Theme:ApplyFont(self.Label, "Normal", 12)
+        self.Label:SetTextColor(Theme:GetColor("text"))
+        Theme:ApplyFont(self.Text, "Normal", 12)
+        self.Text:SetTextColor(1, 1, 1)
+        local r, g, b = Theme:GetColor("border")
+        self:SetBackdropBorderColor(r, g, b, 1)
+      end
     elseif type == "slider" then
       frame.UpdateTheme = function(self)
         if self.Text then
-          Theme:ApplyFont(self.Text, "Normal", 12); self.Text:SetTextColor(Theme:GetColor("text"))
+          Theme:ApplyFont(self.Text, "Normal", 12)
+          self.Text:SetTextColor(Theme:GetColor("text"))
         end
         if self.Low then
-          Theme:ApplyFont(self.Low, "Normal", 10); self.Low:SetTextColor(Theme:GetColor("text"))
+          Theme:ApplyFont(self.Low, "Normal", 10)
+          self.Low:SetTextColor(Theme:GetColor("text"))
         end
         if self.High then
-          Theme:ApplyFont(self.High, "Normal", 10); self.High:SetTextColor(Theme:GetColor("text"))
+          Theme:ApplyFont(self.High, "Normal", 10)
+          self.High:SetTextColor(Theme:GetColor("text"))
         end
+        local r, g, b = Theme:GetColor("border")
+        self:SetBackdropBorderColor(r, g, b, 1)
+
+        -- Thumb Highlight
+        local hr, hg, hb = Theme:GetColor("highlight")
+        if self.Thumb then self.Thumb:SetColorTexture(hr, hg, hb, 1) end
       end
     elseif type == "media" then
       frame.UpdateTheme = function(self)
@@ -486,6 +583,15 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
     frame:SetScript("OnValueChanged", function(_, value)
       State:SetValue(item.id, value)
     end)
+    -- Labels for slider
+    if frame.Low then
+      local minVal = item.min or 0
+      frame.Low:SetText(tostring(minVal))
+    end
+    if frame.High then
+      local maxVal = item.max or 100
+      frame.High:SetText(tostring(maxVal))
+    end
   elseif item.type == "editbox" then
     frame:SetText(currentVal or "")
     frame:SetScript("OnEnterPressed", function(eb)
@@ -497,29 +603,56 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
       eb:SetText(State:GetValue(item.id) or item.default or "")
     end)
   elseif item.type == "dropdown" and item.options then
-    UIDropDownMenu_Initialize(frame, function(_, _, _)
-      local info = UIDropDownMenu_CreateInfo()
-      for _, opt in ipairs(item.options) do
-        info.text = opt.label
-        info.value = opt.value
-        info.func = function(b)
-          State:SetValue(item.id, b.value)
-          UIDropDownMenu_SetSelectedValue(frame, b.value)
-          UIDropDownMenu_SetText(frame, opt.label)
-        end
-        info.checked = (currentVal == opt.value)
-        UIDropDownMenu_AddButton(info)
-      end
-    end)
-    UIDropDownMenu_SetSelectedValue(frame, currentVal)
-    UIDropDownMenu_SetText(frame, "Select...") -- Init text logic needed
-    -- Find label for current val
+    -- Initial Text
+    local found = false
     for _, opt in ipairs(item.options) do
       if opt.value == currentVal then
-        UIDropDownMenu_SetText(frame, opt.label)
+        frame.Text:SetText(opt.label)
+        found = true
         break
       end
     end
+    if not found then frame.Text:SetText(item.placeholder or "Select...") end
+
+    frame:SetScript("OnClick", function()
+      if frame.Popup:IsShown() then
+        frame.Popup:Hide()
+      else
+        local popupContent = frame.Popup.Content
+        local kids = { popupContent:GetChildren() }
+        for _, k in ipairs(kids) do
+          k:Hide(); k:ClearAllPoints()
+        end
+
+        local yOff = 0
+        local itemHeight = 20
+        for _, opt in ipairs(item.options) do
+          local btn = CreateFrame("Button", nil, popupContent)
+          btn:SetSize(frame.Popup:GetWidth() - 25, itemHeight)
+          btn:SetPoint("TOPLEFT", 5, yOff)
+
+          local hl = btn:CreateTexture(nil, "HIGHLIGHT")
+          hl:SetAllPoints()
+          hl:SetColorTexture(1, 0.82, 0, 0.2)
+
+          local txt = btn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+          Theme:ApplyFont(txt, "Normal", 12)
+          txt:SetPoint("LEFT", 5, 0)
+          txt:SetText(opt.label)
+
+          btn:SetScript("OnClick", function()
+            State:SetValue(item.id, opt.value)
+            frame.Text:SetText(opt.label)
+            frame.Popup:Hide()
+            if item.onChange then item.onChange(opt.value) end
+          end)
+
+          yOff = yOff - itemHeight
+        end
+        popupContent:SetSize(frame.Popup:GetWidth(), math.abs(yOff))
+        frame.Popup:Show()
+      end
+    end)
   elseif item.type == "media" and item.options then
     -- Initial Text
     local found = false
@@ -643,6 +776,12 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
 
   -- Size & Layout
   local padding = 10
+  local verticalPadding = padding
+
+  -- Add extra vertical space if item has a label above it
+  if item.label and (item.type == "editbox" or item.type == "dropdown" or item.type == "slider" or item.type == "media") then
+    verticalPadding = padding + 15
+  end
 
   if item.type == "alert" then
     frame.severity = item.severity
@@ -694,7 +833,16 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
         totalHeight)
     end
   elseif item.type == "media" then
-    local w, h = 200, 26
+    local w, h = 180, 26
+    if item.width then w = item.width end
+    if PixelUtil then
+      PixelUtil.SetSize(frame, w, h)
+    else
+      frame:SetSize(w, h)
+    end
+  elseif item.type == "dropdown" or item.type == "editbox" or item.type == "slider" then
+    local w, h = 180, 26
+    if item.type == "slider" then h = 14 end -- Slider bar is thinner
     if item.width then w = item.width end
     if PixelUtil then
       PixelUtil.SetSize(frame, w, h)
