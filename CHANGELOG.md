@@ -16,6 +16,7 @@
 - **Component Skinning**: Refactored `editbox`, `dropdown`, and `slider` components to use a thinner, 1-pixel border aesthetic, matching the media selector.
 - **Custom Dropdown**: Implemented a custom button-based dropdown to replace Blizzard's standard template for better styling control.
 - **Custom Slider**: Implemented a template-free slider with 1px borders and themed thumb textures.
+- **Slider Value Indicator**: Added a real-time value indicator to sliders, positioned to the right of the label. Includes automatic decimal precision formatting based on step size.
 
 ### Fixed
 - **Callout Button Hover**: Fixed an issue where custom-colored buttons would revert to default theme colors on mouse leave.

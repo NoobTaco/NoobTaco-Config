@@ -49,6 +49,10 @@ local function GetFrame(type, parent)
       frame.High = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
       Theme:ApplyFont(frame.High, "Normal", 10)
       frame.High:SetPoint("TOPRIGHT", frame, "BOTTOMRIGHT", 0, -2)
+
+      frame.Value = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+      Theme:ApplyFont(frame.Value, "Normal", 12)
+      frame.Value:SetPoint("BOTTOMRIGHT", frame, "TOPRIGHT", 0, 5)
     elseif type == "button" then
       frame = Theme:CreateThemedButton(parent)
     elseif type == "alert" then
@@ -421,6 +425,10 @@ local function GetFrame(type, parent)
           Theme:ApplyFont(self.High, "Normal", 10)
           self.High:SetTextColor(Theme:GetColor("text"))
         end
+        if self.Value then
+          Theme:ApplyFont(self.Value, "Normal", 12)
+          self.Value:SetTextColor(Theme:GetColor("header")) -- Use header color for value highlight? Or maybe just text
+        end
         local r, g, b = Theme:GetColor("border")
         self:SetBackdropBorderColor(r, g, b, 1)
 
@@ -580,8 +588,25 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
     frame:SetMinMaxValues(item.min or 0, item.max or 100)
     frame:SetValueStep(item.step or 1)
     frame:SetValue(currentVal or (item.min or 0))
+
+    local function UpdateValueText(val)
+      if frame.Value then
+        local fmt = "%.0f"
+        if (item.step or 1) < 1 then
+          fmt = "%.1f"
+        end
+        if (item.step or 1) < 0.1 then
+          fmt = "%.2f"
+        end
+        frame.Value:SetText(string.format(fmt, val))
+      end
+    end
+
+    UpdateValueText(currentVal or (item.min or 0))
+
     frame:SetScript("OnValueChanged", function(_, value)
       State:SetValue(item.id, value)
+      UpdateValueText(value)
     end)
     -- Labels for slider
     if frame.Low then
