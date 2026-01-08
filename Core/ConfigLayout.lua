@@ -1,4 +1,4 @@
-local Name, AddOn = ...
+local _, AddOn = ...
 local ConfigLayout = {}
 AddOn.ConfigLayout = ConfigLayout
 
@@ -7,11 +7,6 @@ local CreateFrame = CreateFrame
 
 local Theme = AddOn.ConfigTheme
 
-local function UpdateButtonState(btn)
-  local colors = Theme:GetColor("button_" .. (btn.isSelected and "selected" or (btn.isHover and "hover" or "normal")))
-  local r, g, b, a = unpack(colors)
-  btn.bg:SetColorTexture(r, g, b, a)
-end
 
 function ConfigLayout:CreateTwoColumnLayout(parent)
   local container = CreateFrame("Frame", nil, parent)
@@ -67,12 +62,12 @@ function ConfigLayout:CreateTwoColumnLayout(parent)
   scrollBar:SetValueStep(1)
 
   -- Link: ScrollBar -> ScrollFrame
-  scrollBar:SetScript("OnValueChanged", function(self, value)
+  scrollBar:SetScript("OnValueChanged", function(_, value)
     content:SetVerticalScroll(value)
   end)
 
   -- Link: ScrollFrame -> ScrollBar
-  content:SetScript("OnScrollRangeChanged", function(self, xrange, yrange)
+  content:SetScript("OnScrollRangeChanged", function(_, _, yrange)
     scrollBar:SetMinMaxValues(0, yrange)
     if yrange > 0 then
       local thumbHeight = math.max(20, (content:GetHeight() / (content:GetHeight() + yrange)) * content:GetHeight())
@@ -84,11 +79,11 @@ function ConfigLayout:CreateTwoColumnLayout(parent)
     end
   end)
 
-  content:SetScript("OnVerticalScroll", function(self, offset)
+  content:SetScript("OnVerticalScroll", function(_, offset)
     scrollBar:SetValue(offset)
   end)
 
-  content:SetScript("OnMouseWheel", function(self, delta)
+  content:SetScript("OnMouseWheel", function(_, delta)
     local current = scrollBar:GetValue()
     local step = 40 -- Scroll speed
     scrollBar:SetValue(current - (delta * step))
@@ -106,7 +101,7 @@ function ConfigLayout:CreateTwoColumnLayout(parent)
   return container
 end
 
-function ConfigLayout:AddSidebarButton(container, id, label, onClick)
+function ConfigLayout:AddSidebarButton(container, _, label, onClick)
   local sidebar = container.Sidebar
   local count = sidebar.buttonCount or 0
 
@@ -118,12 +113,12 @@ function ConfigLayout:AddSidebarButton(container, id, label, onClick)
   btn.Text:SetText(label)
 
   -- Wrapper for OnClick to handle selection logic if we wanted (managed by parent?)
-  btn:SetScript("OnClick", function(self)
-    if container.SelectedBtn and container.SelectedBtn ~= self then
+  btn:SetScript("OnClick", function(b)
+    if container.SelectedBtn and container.SelectedBtn ~= b then
       container.SelectedBtn:SetSelected(false)
     end
-    self:SetSelected(true)
-    container.SelectedBtn = self
+    b:SetSelected(true)
+    container.SelectedBtn = b
 
     if onClick then onClick() end
   end)

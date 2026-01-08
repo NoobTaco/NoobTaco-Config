@@ -1,4 +1,4 @@
-local Name, AddOn = ...
+local _, AddOn = ...
 local ConfigRenderer = {}
 AddOn.ConfigRenderer = ConfigRenderer
 
@@ -228,16 +228,6 @@ local function GetFrame(type, parent)
       frame.UpdateTheme = function(self)
         Theme:ApplyFont(self.Title, "Bold", 13)
         Theme:ApplyFont(self.Status, "Bold", 10)
-
-        -- Use Button colors for consistent "clickable" look, but slightly transparent/different if needed
-        -- Or just use hardcoded lighter value if Theme doesn't have a specific "Section" color
-        -- We'll try to map to button_normal for collapsed, button_hover for expanded (initially handled in Render logic, but should be here too)
-
-        local r, g, b = Theme:GetColor("button_normal")
-        -- Make it a bit lighter than standard button? Or just consistent.
-        -- Let's stick to the Render logic for state, but maybe we can use helper here?
-        -- Actually, Render sets the color based on 'expanded' state. We should perhaps respect that here or let Render handle it.
-        -- For now, we'll let Render handle the color toggle, this UpdateTheme just handles Fonts.
       end
     else
       frame = CreateFrame("Frame", nil, parent)
@@ -249,7 +239,7 @@ local function GetFrame(type, parent)
     if type == "alert" then
       frame.UpdateTheme = function(self)
         local severity = self.severity or "info"
-        local r, g, b, a = Theme:GetAlertColor(severity)
+        local r, g, b = Theme:GetAlertColor(severity)
         self.bg:SetColorTexture(r, g, b, 0.2)
         self.text:SetTextColor(r, g, b, 1)
         Theme:ApplyFont(self.text, "Normal", 12)
@@ -307,7 +297,6 @@ function ConfigRenderer:Clear(container)
   local content = container.ContentChild
   if not content then return end
 
-  local children = { match = content:GetChildren() } -- using match is a placeholder if GetChildren returns vararg
   -- Actually GetChildren returns varargs.
   local childs = { content:GetChildren() }
   for _, child in ipairs(childs) do
@@ -415,28 +404,28 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
 
   if item.type == "checkbox" then
     frame:SetChecked(currentVal == true)
-    frame:SetScript("OnClick", function(self)
-      State:SetValue(item.id, self:GetChecked())
+    frame:SetScript("OnClick", function(chk)
+      State:SetValue(item.id, chk:GetChecked())
     end)
   elseif item.type == "slider" then
     frame:SetMinMaxValues(item.min or 0, item.max or 100)
     frame:SetValueStep(item.step or 1)
     frame:SetValue(currentVal or (item.min or 0))
-    frame:SetScript("OnValueChanged", function(self, value)
+    frame:SetScript("OnValueChanged", function(_, value)
       State:SetValue(item.id, value)
     end)
   elseif item.type == "editbox" then
     frame:SetText(currentVal or "")
-    frame:SetScript("OnEnterPressed", function(self)
-      State:SetValue(item.id, self:GetText())
-      self:ClearFocus()
+    frame:SetScript("OnEnterPressed", function(eb)
+      State:SetValue(item.id, eb:GetText())
+      eb:ClearFocus()
     end)
-    frame:SetScript("OnEscapePressed", function(self)
-      self:ClearFocus()
-      self:SetText(State:GetValue(item.id) or item.default or "")
+    frame:SetScript("OnEscapePressed", function(eb)
+      eb:ClearFocus()
+      eb:SetText(State:GetValue(item.id) or item.default or "")
     end)
   elseif item.type == "dropdown" and item.options then
-    UIDropDownMenu_Initialize(frame, function(self, level, menuList)
+    UIDropDownMenu_Initialize(frame, function(_, _, _)
       local info = UIDropDownMenu_CreateInfo()
       for _, opt in ipairs(item.options) do
         info.text = opt.label
@@ -524,8 +513,8 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
             end
           end)
 
-          playBtn:SetScript("OnEnter", function(self)
-            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+          playBtn:SetScript("OnEnter", function(btn)
+            GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
             GameTooltip:SetText("Play Sample")
             GameTooltip:Show()
           end)
@@ -541,7 +530,8 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
         frame.Popup:Show()
       end
     end)
-    -- Close popup when clicking elsewhere (simplified: just on hide parent or something? For strict focus loss, we need a FullScreen catch frame, but for now simple toggle is ok)
+    -- Close popup when clicking elsewhere (simplified: just on hide parent or something?
+    -- For strict focus loss, we need a FullScreen catch frame, but for now simple toggle is ok)
   elseif item.type == "colorpicker" then
     -- Hex to RGB conversion
     local function hex2rgb(hex)

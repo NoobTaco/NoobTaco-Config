@@ -1,4 +1,4 @@
-local Name, AddOn = ...
+local _, AddOn = ...
 local Theme = {}
 AddOn.ConfigTheme = Theme
 
@@ -99,7 +99,7 @@ function Theme:GetAlertColor(severity)
 end
 
 function Theme:GetButtonColorsForAlert(severity)
-  local r, g, b, a = self:GetAlertColor(severity)
+  local r, g, b = self:GetAlertColor(severity)
 
   -- Calculate hover (lighter)
   -- Mix with white for better visibility on bright colors
@@ -204,7 +204,7 @@ function Theme:CreateThemedButton(parent)
   btn:SetScript("OnEnable", function(b)
     self:UpdateButtonState(b)
   end)
-  btn:SetScript("OnDisable", function(b)
+  btn:SetScript("OnDisable", function(_)
     -- Optional: dim?
   end)
 
