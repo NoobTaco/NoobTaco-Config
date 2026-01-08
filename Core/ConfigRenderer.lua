@@ -369,19 +369,25 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
     end
   elseif item.type == "row" then
     -- Handle Row Layout
-    -- Recursively render children in a sub-cursor context?
-    -- For now simple implementation: just force children to next tool call.
-    -- Actually, RenderGroup is better for rows?
-    -- Let's skip complex row logic for this turn and just support simple items.
-    -- If row, we iterate children.
+    -- Force new row if we are not at the start
+    if cursor.x > 10 then
+      cursor.x = 10
+      cursor.y = cursor.y - cursor.rowHeight - padding
+      cursor.rowHeight = 0
+    end
+
     if item.children then
       local rowCursor = { x = cursor.x, y = cursor.y, rowHeight = 0, maxWidth = cursor.maxWidth }
       for _, child in ipairs(item.children) do
         self:RenderItem(child, parent, rowCursor)
       end
-      -- Update main cursor y
-      cursor.y = rowCursor.y
-      return -- Skip default layout logic for row container itself
+      -- Update main cursor y to account for the row's total height consumption
+      -- If the row wrapped locally, rowCursor.y is already lower.
+      -- We must also consume the height of the current/last row line.
+      cursor.y = rowCursor.y - rowCursor.rowHeight - 10 -- Add padding
+      cursor.rowHeight = 0
+      cursor.x = 10                                     -- Reset X for next main item
+      return                                            -- Skip default layout logic for row container itself
     end
   elseif item.type == "callout" then
     frame.Text:SetWidth(cursor.maxWidth - 20)
@@ -408,12 +414,28 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
   end
 
   -- Measure effective width for layout
+  -- Measure effective width/height for layout
   local frameWidth, frameHeight = frame:GetSize()
   local effectiveWidth = frameWidth
+  local effectiveHeight = frameHeight
 
   if item.type == "checkbox" and frame.Text then
     local textWidth = frame.Text:GetStringWidth() or 100
     effectiveWidth = frameWidth + textWidth + 5
+  elseif item.type == "slider" then
+    -- Sliders have labels outside their frame bounds
+    local topHeight = 0
+    local bottomHeight = 0
+
+    if frame.Text and frame.Text:GetText() then
+      topHeight = frame.Text:GetStringHeight() + 5
+    end
+
+    if (frame.Low and frame.Low:GetText()) or (frame.High and frame.High:GetText()) then
+      bottomHeight = 14 -- Approx for small font
+    end
+
+    effectiveHeight = frameHeight + topHeight + bottomHeight
   elseif (item.type == "editbox" or item.type == "dropdown") and frame.Label then
     -- Label is above/integrated
   end
@@ -426,13 +448,20 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
   end
 
   frame:ClearAllPoints()
+
+  -- Calculate Top Offset for Sliders (applies to PixelUtil too)
+  local yOffset = 0
+  if item.type == "slider" and frame.Text and frame.Text:GetText() then
+    yOffset = -(frame.Text:GetStringHeight() + 5)
+  end
+
   if PixelUtil then
-    PixelUtil.SetPoint(frame, "TOPLEFT", parent, "TOPLEFT", cursor.x, cursor.y)
+    PixelUtil.SetPoint(frame, "TOPLEFT", parent, "TOPLEFT", cursor.x, cursor.y + yOffset)
   else
-    frame:SetPoint("TOPLEFT", parent, "TOPLEFT", cursor.x, cursor.y)
+    frame:SetPoint("TOPLEFT", parent, "TOPLEFT", cursor.x, cursor.y + yOffset)
   end
 
   -- Update Cursor
   cursor.x = cursor.x + effectiveWidth + padding
-  cursor.rowHeight = math.max(cursor.rowHeight, frameHeight)
+  cursor.rowHeight = math.max(cursor.rowHeight, effectiveHeight)
 end

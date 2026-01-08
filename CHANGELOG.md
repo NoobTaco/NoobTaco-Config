@@ -15,6 +15,7 @@
 - **Header Visibility**: Increased brightness of Header text in default themes (using Highlight color) for better readability.
 - **Layout Padding**: Added internal padding to the configuration container to prevent content from touching window edges.
 - **Modern Scrollbar**: Replaced standard scrollbar with a thin, minimal slider-based scrollbar for a cleaner aesthetic.
+- **Developer Options Layout**: Fixed an issue where sliders in the Developer Options section would obscure the "Positioning" header and lack sufficient vertical padding.
 
 ## [1.0] - 2026-01-08
 - Initial Release
