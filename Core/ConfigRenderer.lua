@@ -682,8 +682,6 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
     end
 
     effectiveHeight = frameHeight + topHeight + bottomHeight
-  elseif (item.type == "editbox" or item.type == "dropdown" or item.type == "media") and frame.Label then
-    -- Label is above/integrated
   end
 
   if cursor.x + effectiveWidth > cursor.maxWidth then
