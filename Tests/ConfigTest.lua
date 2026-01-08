@@ -21,9 +21,11 @@ function ConfigTest:Initialize()
 
     -- On Show, Render the Config
     local function TryRender()
-      if not canvas.isRendered and canvas:GetWidth() > 0 then
+      local width = canvas:GetWidth()
+      -- Only render if width is valid and changed
+      if width > 10 and (not canvas.lastRenderedWidth or math.abs(canvas.lastRenderedWidth - width) > 5) then
         self:RenderContent(canvas)
-        canvas.isRendered = true
+        canvas.lastRenderedWidth = width
       end
     end
 

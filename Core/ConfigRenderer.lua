@@ -19,7 +19,17 @@ local function GetFrame(type, parent)
       frame = CreateFrame("CheckButton", nil, parent, "ChatConfigCheckButtonTemplate")
       if frame.Text then Theme:ApplyFont(frame.Text, "Normal", 12) end
     elseif type == "slider" then
-      frame = CreateFrame("Slider", nil, parent, "OptionsSliderTemplate")
+      -- Give the slider a unique name so that label sub-elements from OptionsSliderTemplate are accessible
+      local frameName = "NoobTacoConfigSlider" .. (AddOn.SliderCount or 0)
+      AddOn.SliderCount = (AddOn.SliderCount or 0) + 1
+      frame = CreateFrame("Slider", frameName, parent, "OptionsSliderTemplate")
+
+      -- Template usually creates these sub-elements:
+      -- $parentText, $parentLow, $parentHigh
+      frame.Text = _G[frameName .. "Text"]
+      frame.Low = _G[frameName .. "Low"]
+      frame.High = _G[frameName .. "High"]
+
       if frame.Text then Theme:ApplyFont(frame.Text, "Normal", 12) end
       if frame.Low then Theme:ApplyFont(frame.Low, "Normal", 10) end
       if frame.High then Theme:ApplyFont(frame.High, "Normal", 10) end
@@ -366,6 +376,16 @@ function ConfigRenderer:Render(schema, container)
 
   local content = container.ContentChild
   local width = container.Content:GetWidth()
+  -- Handle initial zero-width or small-width case
+  if width < 200 then
+    -- Fallback: Parent width - Sidebar(200) - Padding(50)
+    local parentWidth = container:GetWidth()
+    if parentWidth > 200 then
+      width = parentWidth - 250
+    else
+      width = 550 -- Safe default
+    end
+  end
 
   local cursor = {
     x = 10,
@@ -375,6 +395,10 @@ function ConfigRenderer:Render(schema, container)
   }
 
   self:RenderGroup(schema, content, cursor)
+
+  -- Update Content Size to enable scrolling
+  local totalHeight = math.abs(cursor.y) + cursor.rowHeight + 20
+  content:SetSize(width, totalHeight)
 end
 
 function ConfigRenderer:RenderGroup(groupSchema, parent, cursor)
@@ -800,6 +824,7 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
 
   if item.type == "checkbox" and frame.Text then
     local textWidth = frame.Text:GetStringWidth() or 100
+    if textWidth == 0 then textWidth = 100 end -- Fallback
     effectiveWidth = frameWidth + textWidth + 5
   elseif item.type == "slider" then
     -- Sliders have labels outside their frame bounds
@@ -807,7 +832,9 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
     local bottomHeight = 0
 
     if frame.Text and frame.Text:GetText() then
-      topHeight = frame.Text:GetStringHeight() + 5
+      topHeight = frame.Text:GetStringHeight()
+      if topHeight == 0 then topHeight = 14 end -- Fallback for initial load
+      topHeight = topHeight + 5
     end
 
     if (frame.Low and frame.Low:GetText()) or (frame.High and frame.High:GetText()) then
@@ -817,7 +844,7 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
     effectiveHeight = frameHeight + topHeight + bottomHeight
   end
 
-  if cursor.x + effectiveWidth > cursor.maxWidth then
+  if cursor.x + effectiveWidth > cursor.maxWidth and cursor.x > 10 then
     -- New Row
     cursor.x = 10
     cursor.y = cursor.y - cursor.rowHeight - padding
