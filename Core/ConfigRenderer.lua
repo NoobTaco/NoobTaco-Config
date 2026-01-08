@@ -807,12 +807,6 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
 
   -- Size & Layout
   local padding = 10
-  local verticalPadding = padding
-
-  -- Add extra vertical space if item has a label above it
-  if item.label and (item.type == "editbox" or item.type == "dropdown" or item.type == "slider" or item.type == "media") then
-    verticalPadding = padding + 15
-  end
 
   if item.type == "alert" then
     frame.severity = item.severity

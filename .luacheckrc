@@ -19,7 +19,8 @@ read_globals = {
     "C_Timer",
     "wipe",
     "strtrim",
-    "strmatch"
+    "strmatch",
+    "GetBuildInfo"
 }
 
 -- Exclude test files and installed rock dependencies
