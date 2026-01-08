@@ -1,0 +1,3 @@
+package-as: NoobTaco-Config
+enable-nolib-creation: no
+license-output: LICENSE

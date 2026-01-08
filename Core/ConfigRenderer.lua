@@ -1,0 +1,362 @@
+local Name, AddOn = ...
+local ConfigRenderer = {}
+AddOn.ConfigRenderer = ConfigRenderer
+
+local Theme = AddOn.ConfigTheme
+local State = AddOn.ConfigState
+local PixelUtil = AddOn.PixelUtil or PixelUtil
+
+-- Simple Object Pool
+local FramePool = {}
+local function GetFrame(type, parent)
+  if not FramePool[type] then FramePool[type] = {} end
+  local pool = FramePool[type]
+  local frame = table.remove(pool)
+
+  if not frame then
+    -- Create new frame based on type
+    if type == "checkbox" then
+      frame = CreateFrame("CheckButton", nil, parent, "ChatConfigCheckButtonTemplate")
+      if frame.Text then Theme:ApplyFont(frame.Text, "Normal", 12) end
+    elseif type == "slider" then
+      frame = CreateFrame("Slider", nil, parent, "OptionsSliderTemplate")
+      if frame.Text then Theme:ApplyFont(frame.Text, "Normal", 12) end
+      if frame.Low then Theme:ApplyFont(frame.Low, "Normal", 10) end
+      if frame.High then Theme:ApplyFont(frame.High, "Normal", 10) end
+    elseif type == "button" then
+      frame = Theme:CreateThemedButton(parent)
+    elseif type == "alert" then
+      frame = CreateFrame("Frame", nil, parent)
+      frame.text = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+      Theme:ApplyFont(frame.text, "Normal", 12)
+      frame.text:SetAllPoints()
+      frame.bg = frame:CreateTexture(nil, "BACKGROUND")
+      frame.bg:SetAllPoints()
+    elseif type == "description" then
+      frame = CreateFrame("Frame", nil, parent)
+      frame.text = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+      Theme:ApplyFont(frame.text, "Normal", 12)
+      frame.text:SetAllPoints()
+      frame.text:SetJustifyH("LEFT")
+      frame.text:SetJustifyV("TOP")
+    elseif type == "header" then
+      frame = CreateFrame("Frame", nil, parent)
+      frame.text = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+      Theme:ApplyFont(frame.text, "Bold", 14)
+      frame.text:SetPoint("TOPLEFT", 0, 0)
+      frame.line = frame:CreateTexture(nil, "ARTWORK")
+      frame.line:SetHeight(1)
+      frame.line:SetColorTexture(1, 1, 1, 0.2)
+      frame.line:SetPoint("TOPLEFT", frame.text, "BOTTOMLEFT", 0, -5)
+      frame.line:SetPoint("RIGHT", frame, "RIGHT", 0, 0)
+    elseif type == "editbox" then
+      frame = CreateFrame("EditBox", nil, parent, "InputBoxTemplate")
+      frame:SetAutoFocus(false)
+      frame.Label = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+      Theme:ApplyFont(frame.Label, "Normal", 12)
+      -- EditBox is a FontInstance, apply directly
+      Theme:ApplyFont(frame, "Normal", 12)
+      frame.Label:SetPoint("BOTTOMLEFT", frame, "TOPLEFT", 0, 5)
+    elseif type == "dropdown" then
+      frame = CreateFrame("Frame", nil, parent, "UIDropDownMenuTemplate")
+      UIDropDownMenu_SetWidth(frame, 150)
+      frame.Label = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+      Theme:ApplyFont(frame.Label, "Normal", 12)
+      -- Note: Dropdown text is managed by internal buttons, hard to skin without hooks
+      -- But we can try to hook standard template/helpers if needed later.
+      frame.Label:SetPoint("BOTTOMLEFT", frame, "TOPLEFT", 16, 5)
+    elseif type == "colorpicker" then
+      frame = CreateFrame("Button", nil, parent)
+      frame:SetSize(20, 20)
+      frame.swatch = frame:CreateTexture(nil, "OVERLAY")
+      frame.swatch:SetAllPoints()
+      frame.swatch:SetColorTexture(1, 1, 1)
+      frame.Label = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+      Theme:ApplyFont(frame.Label, "Normal", 12)
+      frame.Label:SetPoint("LEFT", frame, "RIGHT", 10, 0)
+
+      -- Border
+      frame.border = frame:CreateTexture(nil, "BACKGROUND")
+      frame.border:SetPoint("TOPLEFT", -1, 1)
+      frame.border:SetPoint("BOTTOMRIGHT", 1, -1)
+      frame.border:SetColorTexture(0.5, 0.5, 0.5)
+      frame.border:SetColorTexture(0.5, 0.5, 0.5)
+    elseif type == "callout" then
+      frame = CreateFrame("Frame", nil, parent, "BackdropTemplate")
+      frame:SetBackdrop({
+        bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+        edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+        tile = true,
+        tileSize = 16,
+        edgeSize = 16,
+        insets = { left = 4, right = 4, top = 4, bottom = 4 }
+      })
+      frame:SetBackdropBorderColor(1, 0.82, 0, 1) -- Default Gold
+      frame:SetBackdropColor(0.2, 0.2, 0.2, 0.9)  -- Dark BG
+
+      frame.Title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+      Theme:ApplyFont(frame.Title, "Bold", 14)
+      frame.Title:SetPoint("TOPLEFT", 10, -10)
+      frame.Title:SetTextColor(1, 0.82, 0) -- Gold Title
+
+      frame.Text = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+      Theme:ApplyFont(frame.Text, "Normal", 12)
+      frame.Text:SetPoint("TOPLEFT", frame.Title, "BOTTOMLEFT", 0, -5)
+      frame.Text:SetPoint("RIGHT", frame, "RIGHT", -10, 0)
+      frame.Text:SetJustifyH("LEFT")
+
+      frame.Button = Theme:CreateThemedButton(frame)
+      frame.Button:SetPoint("BOTTOMLEFT", 10, 10)
+      frame.Button:SetSize(200, 30)
+
+      -- Custom button style for callout
+      frame.Button.bg:SetColorTexture(1, 0.82, 0, 1) -- Gold Button
+      frame.Button.Text:SetTextColor(0, 0, 0, 1)     -- Black Text
+    else
+      frame = CreateFrame("Frame", nil, parent)
+    end
+  end
+
+  frame.type = type
+  frame:SetParent(parent)
+  frame:Show()
+  return frame
+end
+
+function ConfigRenderer:Clear(container)
+  local content = container.ContentChild
+  if not content then return end
+
+  local children = { match = content:GetChildren() } -- using match is a placeholder if GetChildren returns vararg
+  -- Actually GetChildren returns varargs.
+  local childs = { content:GetChildren() }
+  for _, child in ipairs(childs) do
+    child:Hide()
+    child:ClearAllPoints()
+    if child.type and FramePool[child.type] then
+      table.insert(FramePool[child.type], child)
+    end
+  end
+
+  -- Reset scroll child size?
+  content:SetSize(1, 1)
+end
+
+function ConfigRenderer:Render(schema, container)
+  self:Clear(container)
+
+  local content = container.ContentChild
+  local width = container.Content:GetWidth()
+
+  local cursor = {
+    x = 10,
+    y = -10,
+    rowHeight = 0,
+    maxWidth = width - 20
+  }
+
+  self:RenderGroup(schema, content, cursor)
+end
+
+function ConfigRenderer:RenderGroup(groupSchema, parent, cursor)
+  if not groupSchema or not groupSchema.children then return end
+
+  for _, item in ipairs(groupSchema.children) do
+    self:RenderItem(item, parent, cursor)
+  end
+end
+
+function ConfigRenderer:RenderItem(item, parent, cursor)
+  local frame = GetFrame(item.type, parent)
+
+  -- Setup basic props
+  if item.label then
+    if item.type == "checkbox" or item.type == "slider" then
+      if frame.Text then frame.Text:SetText(item.label) end
+    elseif item.type == "editbox" or item.type == "dropdown" or item.type == "colorpicker" then
+      if frame.Label then frame.Label:SetText(item.label) end
+    elseif item.type == "header" then
+      frame.text:SetText(item.label)
+    elseif item.type == "description" then
+      frame.text:SetText(item.label)
+    elseif item.type == "button" then
+      frame.Text:SetText(item.label)
+    end
+  end
+
+  if item.type == "callout" then
+    frame.Title:SetText(item.title)
+    frame.Text:SetText(item.text)
+    frame.Button.Text:SetText(item.buttonText or "Click Me")
+  end
+
+  -- State Binding & Actions
+  local currentVal = nil
+  if item.id then
+    currentVal = State:GetValue(item.id)
+    if currentVal == nil then currentVal = item.default end
+  end
+
+  if item.type == "checkbox" then
+    frame:SetChecked(currentVal == true)
+    frame:SetScript("OnClick", function(self)
+      State:SetValue(item.id, self:GetChecked())
+    end)
+  elseif item.type == "slider" then
+    frame:SetMinMaxValues(item.min or 0, item.max or 100)
+    frame:SetValueStep(item.step or 1)
+    frame:SetValue(currentVal or (item.min or 0))
+    frame:SetScript("OnValueChanged", function(self, value)
+      State:SetValue(item.id, value)
+    end)
+  elseif item.type == "editbox" then
+    frame:SetText(currentVal or "")
+    frame:SetScript("OnEnterPressed", function(self)
+      State:SetValue(item.id, self:GetText())
+      self:ClearFocus()
+    end)
+    frame:SetScript("OnEscapePressed", function(self)
+      self:ClearFocus()
+      self:SetText(State:GetValue(item.id) or item.default or "")
+    end)
+  elseif item.type == "dropdown" and item.options then
+    UIDropDownMenu_Initialize(frame, function(self, level, menuList)
+      local info = UIDropDownMenu_CreateInfo()
+      for _, opt in ipairs(item.options) do
+        info.text = opt.label
+        info.value = opt.value
+        info.func = function(b)
+          State:SetValue(item.id, b.value)
+          UIDropDownMenu_SetSelectedValue(frame, b.value)
+          UIDropDownMenu_SetText(frame, opt.label)
+        end
+        info.checked = (currentVal == opt.value)
+        UIDropDownMenu_AddButton(info)
+      end
+    end)
+    UIDropDownMenu_SetSelectedValue(frame, currentVal)
+    UIDropDownMenu_SetText(frame, "Select...") -- Init text logic needed
+    -- Find label for current val
+    for _, opt in ipairs(item.options) do
+      if opt.value == currentVal then
+        UIDropDownMenu_SetText(frame, opt.label)
+        break
+      end
+    end
+  elseif item.type == "colorpicker" then
+    -- Hex to RGB conversion
+    local function hex2rgb(hex)
+      hex = hex:gsub("#", "")
+      return tonumber("0x" .. hex:sub(1, 2)) / 255, tonumber("0x" .. hex:sub(3, 4)) / 255,
+          tonumber("0x" .. hex:sub(5, 6)) / 255
+    end
+    if currentVal and type(currentVal) == "string" then
+      local r, g, b = hex2rgb(currentVal)
+      frame.swatch:SetColorTexture(r, g, b)
+    end
+
+    frame:SetScript("OnClick", function()
+      -- Open Color Picker (mock)
+      print("Opening ColorPicker for", item.id)
+    end)
+  elseif item.type == "button" and item.onClick then
+    frame:SetScript("OnClick", item.onClick)
+  elseif item.type == "callout" then
+    frame.Button:SetScript("OnClick", item.onButtonClick)
+    -- Styling overrides from item?
+    if item.style == "warning" then
+      frame:SetBackdropBorderColor(1, 0.82, 0, 1)
+    end
+  end
+
+
+  -- Size & Layout
+  local padding = 10
+
+  if item.type == "alert" then
+    if item.text then frame.text:SetText(item.text) end
+    local r, g, b, a = Theme:GetAlertColor(item.severity)
+    frame.bg:SetColorTexture(r, g, b, 0.2)
+    frame.text:SetTextColor(r, g, b, 1)
+    if PixelUtil then PixelUtil.SetSize(frame, cursor.maxWidth, 30) else frame:SetSize(cursor.maxWidth, 30) end
+  elseif item.type == "header" then
+    if PixelUtil then PixelUtil.SetSize(frame, cursor.maxWidth, 30) else frame:SetSize(cursor.maxWidth, 30) end
+  elseif item.type == "description" then
+    frame.text:SetWidth(cursor.maxWidth)                -- Fix width for wrap
+    if item.text then frame.text:SetText(item.text) end -- Prioritize text prop or label
+    local height = frame.text:GetStringHeight()
+    if PixelUtil then
+      PixelUtil.SetSize(frame, cursor.maxWidth, height + 10)
+    else
+      frame:SetSize(cursor.maxWidth,
+        height + 10)
+    end
+  elseif item.type == "row" then
+    -- Handle Row Layout
+    -- Recursively render children in a sub-cursor context?
+    -- For now simple implementation: just force children to next tool call.
+    -- Actually, RenderGroup is better for rows?
+    -- Let's skip complex row logic for this turn and just support simple items.
+    -- If row, we iterate children.
+    if item.children then
+      local rowCursor = { x = cursor.x, y = cursor.y, rowHeight = 0, maxWidth = cursor.maxWidth }
+      for _, child in ipairs(item.children) do
+        self:RenderItem(child, parent, rowCursor)
+      end
+      -- Update main cursor y
+      cursor.y = rowCursor.y
+      return -- Skip default layout logic for row container itself
+    end
+  elseif item.type == "callout" then
+    frame.Text:SetWidth(cursor.maxWidth - 20)
+    local textHeight = frame.Text:GetStringHeight()
+    local totalHeight = 10 + 20 + 5 + textHeight + 10 + 30 + 10 -- Padding + Title + pad + Text + pad + Button + pad
+    if PixelUtil then
+      PixelUtil.SetSize(frame, cursor.maxWidth, totalHeight)
+    else
+      frame:SetSize(cursor.maxWidth,
+        totalHeight)
+    end
+  else
+    -- Basic sizing
+    local w, h = 150, 26
+    if item.type == "checkbox" or item.type == "colorpicker" then w, h = 30, 30 end
+    if item.type == "editbox" then w = 200 end
+    if item.width then w = item.width end
+
+    if PixelUtil then
+      PixelUtil.SetSize(frame, w, h)
+    else
+      frame:SetSize(w, h)
+    end
+  end
+
+  -- Measure effective width for layout
+  local frameWidth, frameHeight = frame:GetSize()
+  local effectiveWidth = frameWidth
+
+  if item.type == "checkbox" and frame.Text then
+    local textWidth = frame.Text:GetStringWidth() or 100
+    effectiveWidth = frameWidth + textWidth + 5
+  elseif (item.type == "editbox" or item.type == "dropdown") and frame.Label then
+    -- Label is above/integrated
+  end
+
+  if cursor.x + effectiveWidth > cursor.maxWidth then
+    -- New Row
+    cursor.x = 10
+    cursor.y = cursor.y - cursor.rowHeight - padding
+    cursor.rowHeight = 0
+  end
+
+  frame:ClearAllPoints()
+  if PixelUtil then
+    PixelUtil.SetPoint(frame, "TOPLEFT", parent, "TOPLEFT", cursor.x, cursor.y)
+  else
+    frame:SetPoint("TOPLEFT", parent, "TOPLEFT", cursor.x, cursor.y)
+  end
+
+  -- Update Cursor
+  cursor.x = cursor.x + effectiveWidth + padding
+  cursor.rowHeight = math.max(cursor.rowHeight, frameHeight)
+end
