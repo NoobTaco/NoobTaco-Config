@@ -157,6 +157,31 @@ function ConfigTest:RenderContent(parent)
     }
   }
 
+  local AboutSchema = {
+    type = "group",
+    children = {
+      { type = "header", label = "About NoobTaco Config" },
+      {
+        type = "description",
+        text =
+        "This is a demo configuration library for NoobTacoUI. It provides a standardized way to build settings menus with a consistent look and feel.\n\nCreated by NoobTaco Development Team."
+      },
+      { type = "header", label = "Media Test" },
+      {
+        id = "selectedSound",
+        type = "media",
+        label = "Notification Sound",
+        default = "Sound\\Interface\\RaidWarning.ogg",  -- Default Sound
+        options = {
+          { label = "Raid Warning",        value = "Sound\\Interface\\RaidWarning.ogg" },
+          { label = "Level Up",            value = "Sound\\Interface\\LevelUp.ogg" },
+          { label = "Auction Window Open", value = "Sound\\Interface\\AuctionWindowOpen.ogg" },
+          { label = "Murloc",              value = "Sound\\Creature\\Murloc\\mMurlocAggroOld.ogg" },
+        }
+      }
+    }
+  }
+
   -- Initialize State with Dummy DB
   local DummyDB = {
     enableMinimap = true,
@@ -164,7 +189,8 @@ function ConfigTest:RenderContent(parent)
     accentColor = "00A8FF",
     enableToasts = true,
     apiKey = "SECRET_KEY",
-    debugLevel = "WARN"
+    debugLevel = "WARN",
+    selectedSound = "Sound\\Interface\\RaidWarning.ogg"
   }
   AddOn.ConfigState:Initialize(DummyDB)
 
@@ -182,7 +208,9 @@ function ConfigTest:RenderContent(parent)
     AddOn.ConfigLayout:AddSidebarButton(layout, "advanced", "Advanced", function()
       AddOn.ConfigRenderer:Render(AdvancedSchema, layout)
     end)
-    AddOn.ConfigLayout:AddSidebarButton(layout, "about", "About", function() print("About Clicked") end)
+    AddOn.ConfigLayout:AddSidebarButton(layout, "about", "About", function()
+      AddOn.ConfigRenderer:Render(AboutSchema, layout)
+    end)
   end
 
   -- Initial Render

@@ -81,6 +81,59 @@ local function GetFrame(type, parent)
       frame.border:SetPoint("BOTTOMRIGHT", 1, -1)
       frame.border:SetColorTexture(0.5, 0.5, 0.5)
       frame.border:SetColorTexture(0.5, 0.5, 0.5)
+    elseif type == "media" then
+      frame = CreateFrame("Button", nil, parent, "BackdropTemplate")
+      -- Basic Dropdown-like appearance
+      frame:SetBackdrop({
+        bgFile = "Interface/Buttons/WHITE8X8",
+        edgeFile = "Interface/Buttons/WHITE8X8",
+        edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+      })
+      frame:SetBackdropBorderColor(0.5, 0.5, 0.5, 1)
+      frame:SetBackdropColor(0.1, 0.1, 0.1, 1)
+
+      frame.Text = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+      Theme:ApplyFont(frame.Text, "Normal", 12)
+      frame.Text:SetPoint("LEFT", 8, 0)
+      frame.Text:SetPoint("RIGHT", -24, 0)
+      frame.Text:SetJustifyH("LEFT")
+
+      -- Chevron/Arrow
+      frame.Arrow = frame:CreateTexture(nil, "ARTWORK")
+      frame.Arrow:SetPoint("RIGHT", -6, 0)
+      frame.Arrow:SetSize(12, 12)
+      frame.Arrow:SetTexture("Interface/ChatFrame/ChatFrameExpandArrow")
+
+      frame.Label = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+      Theme:ApplyFont(frame.Label, "Normal", 12)
+      frame.Label:SetPoint("BOTTOMLEFT", frame, "TOPLEFT", 0, 5)
+
+      -- Popup Frame (Lazy created per instance for now)
+      frame.Popup = CreateFrame("Frame", nil, frame, "BackdropTemplate")
+      frame.Popup:SetPoint("TOPLEFT", frame, "BOTTOMLEFT", 0, -2)
+      frame.Popup:SetPoint("TOPRIGHT", frame, "BOTTOMRIGHT", 0, -2)
+      frame.Popup:SetHeight(200) -- Max height
+      frame.Popup:SetBackdrop({
+        bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+        edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+        tile = true,
+        tileSize = 16,
+        edgeSize = 16,
+        insets = { left = 4, right = 4, top = 4, bottom = 4 }
+      })
+      frame.Popup:SetBackdropColor(0.1, 0.1, 0.1, 0.95)
+      frame.Popup:SetFrameStrata("DIALOG")
+      frame.Popup:Hide()
+
+      -- ScrollFrame for Popup
+      frame.Popup.ScrollFrame = CreateFrame("ScrollFrame", nil, frame.Popup, "UIPanelScrollFrameTemplate")
+      frame.Popup.ScrollFrame:SetPoint("TOPLEFT", 5, -5)
+      frame.Popup.ScrollFrame:SetPoint("BOTTOMRIGHT", -26, 5)
+
+      frame.Popup.Content = CreateFrame("Frame", nil, frame.Popup.ScrollFrame)
+      frame.Popup.Content:SetSize(1, 1)
+      frame.Popup.ScrollFrame:SetScrollChild(frame.Popup.Content)
     elseif type == "callout" then
       frame = CreateFrame("Frame", nil, parent, "BackdropTemplate")
       frame:SetBackdrop({
@@ -182,6 +235,13 @@ local function GetFrame(type, parent)
           Theme:ApplyFont(self.High, "Normal", 10); self.High:SetTextColor(Theme:GetColor("text"))
         end
       end
+    elseif type == "media" then
+      frame.UpdateTheme = function(self)
+        Theme:ApplyFont(self.Label, "Normal", 12)
+        self.Label:SetTextColor(Theme:GetColor("text"))
+        Theme:ApplyFont(self.Text, "Normal", 12)
+        self.Text:SetTextColor(1, 1, 1)
+      end
     end
   end
 
@@ -245,7 +305,7 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
   if item.label then
     if item.type == "checkbox" or item.type == "slider" then
       if frame.Text then frame.Text:SetText(item.label) end
-    elseif item.type == "editbox" or item.type == "dropdown" or item.type == "colorpicker" then
+    elseif item.type == "editbox" or item.type == "dropdown" or item.type == "colorpicker" or item.type == "media" then
       if frame.Label then frame.Label:SetText(item.label) end
     elseif item.type == "header" then
       frame.text:SetText(item.label)
@@ -315,6 +375,89 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
         break
       end
     end
+  elseif item.type == "media" and item.options then
+    -- Initial Text
+    local found = false
+    for _, opt in ipairs(item.options) do
+      if opt.value == currentVal then
+        frame.Text:SetText(opt.label)
+        found = true
+        break
+      end
+    end
+    if not found then frame.Text:SetText(item.placeholder or "Select Media...") end
+
+    frame:SetScript("OnClick", function()
+      if frame.Popup:IsShown() then
+        frame.Popup:Hide()
+      else
+        -- Populate Popup
+        local popupContent = frame.Popup.Content
+        -- Clear existing children (simple way)
+        local kids = { popupContent:GetChildren() }
+        for _, k in ipairs(kids) do
+          k:Hide(); k:ClearAllPoints()
+        end
+
+        local yOff = 0
+        local itemHeight = 20
+
+        for _, opt in ipairs(item.options) do
+          local btn = CreateFrame("Button", nil, popupContent)
+          btn:SetSize(frame.Popup:GetWidth() - 25, itemHeight)
+          btn:SetPoint("TOPLEFT", 5, yOff)
+
+          -- Highlight
+          local hl = btn:CreateTexture(nil, "HIGHLIGHT")
+          hl:SetAllPoints()
+          hl:SetColorTexture(1, 0.82, 0, 0.2)
+
+          -- Text
+          local txt = btn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+          txt:SetPoint("LEFT", 5, 0)
+          txt:SetText(opt.label)
+
+          -- Select Action
+          btn:SetScript("OnClick", function()
+            State:SetValue(item.id, opt.value)
+            frame.Text:SetText(opt.label)
+            frame.Popup:Hide()
+          end)
+
+          -- Play Button (Music Note)
+          local playBtn = CreateFrame("Button", nil, btn)
+          playBtn:SetSize(16, 16)
+          playBtn:SetPoint("RIGHT", -10, 0)
+
+          local icon = playBtn:CreateTexture(nil, "ARTWORK")
+          icon:SetAllPoints()
+          -- "Midnight" style note icon using Atlas identified by user
+          icon:SetAtlas("common-icon-sound")
+
+          playBtn:SetScript("OnClick", function()
+            if opt.value then
+              PlaySoundFile(opt.value, "Master")
+            end
+          end)
+
+          playBtn:SetScript("OnEnter", function(self)
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            GameTooltip:SetText("Play Sample")
+            GameTooltip:Show()
+          end)
+
+          playBtn:SetScript("OnLeave", function()
+            GameTooltip:Hide()
+          end)
+
+          yOff = yOff - itemHeight
+        end
+
+        popupContent:SetSize(frame.Popup:GetWidth(), math.abs(yOff))
+        frame.Popup:Show()
+      end
+    end)
+    -- Close popup when clicking elsewhere (simplified: just on hide parent or something? For strict focus loss, we need a FullScreen catch frame, but for now simple toggle is ok)
   elseif item.type == "colorpicker" then
     -- Hex to RGB conversion
     local function hex2rgb(hex)
@@ -399,6 +542,14 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
       frame:SetSize(cursor.maxWidth,
         totalHeight)
     end
+  elseif item.type == "media" then
+    local w, h = 200, 26
+    if item.width then w = item.width end
+    if PixelUtil then
+      PixelUtil.SetSize(frame, w, h)
+    else
+      frame:SetSize(w, h)
+    end
   else
     -- Basic sizing
     local w, h = 150, 26
@@ -436,7 +587,7 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
     end
 
     effectiveHeight = frameHeight + topHeight + bottomHeight
-  elseif (item.type == "editbox" or item.type == "dropdown") and frame.Label then
+  elseif (item.type == "editbox" or item.type == "dropdown" or item.type == "media") and frame.Label then
     -- Label is above/integrated
   end
 

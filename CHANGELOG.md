@@ -8,6 +8,9 @@
 - **Theme Template**: Added `Core/Theme_Template.lua` to assist developers in creating new themes.
 - **Success Alert**: Added `success` (Green) color to all default themes (Default, Nord, Catppuccin).
 - **Internal Fonts**: Library now includes its own `Media/Fonts` directory (Poppins) and no longer depends on `NoobTacoUI` for fonts.
+- **Media Dropdown**: New widget type `media` featuring a custom dropdown with audio preview capabilities.
+- **Audio Preview**: Integrated `PlaySoundFile` support in media dropdowns with a custom "Music Note" icon and "Play Sample" tooltip.
+- **About Tab**: Integrated schema rendering support for the About tab in `ConfigTest` including text block support.
 
 ### Fixed
 - **Callout Button Hover**: Fixed an issue where custom-colored buttons would revert to default theme colors on mouse leave.
