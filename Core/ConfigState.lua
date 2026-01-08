@@ -1,4 +1,4 @@
-local Name, AddOn = ...
+local _, AddOn = ...
 local ConfigState = {}
 AddOn.ConfigState = ConfigState
 
@@ -23,7 +23,6 @@ function ConfigState:SetValue(key, value)
 
   -- Check against ActiveDB to determine dirty state
   -- Simple comparison for now, might need deep compare for tables
-  local isNowDirty = (self.TempConfig[key] ~= self.ActiveDB[key])
 
   -- We need to check GLOBAL dirty state, not just this key
   -- This is a simplified check. Ideally iterate all keys if needed.

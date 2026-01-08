@@ -2,7 +2,6 @@ local _, AddOn = ...
 local ConfigLayout = {}
 AddOn.ConfigLayout = ConfigLayout
 
-local PixelUtil = AddOn.PixelUtil or PixelUtil -- Fallback if global
 local CreateFrame = CreateFrame
 
 local Theme = AddOn.ConfigTheme

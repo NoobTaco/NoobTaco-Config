@@ -513,8 +513,8 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
             end
           end)
 
-          playBtn:SetScript("OnEnter", function(btn)
-            GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
+          playBtn:SetScript("OnEnter", function(b)
+            GameTooltip:SetOwner(b, "ANCHOR_RIGHT")
             GameTooltip:SetText("Play Sample")
             GameTooltip:Show()
           end)
