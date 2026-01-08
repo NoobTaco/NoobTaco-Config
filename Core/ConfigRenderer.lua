@@ -734,8 +734,14 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
 
           local icon = playBtn:CreateTexture(nil, "ARTWORK")
           icon:SetAllPoints()
-          -- "Midnight" style note icon using Atlas identified by user
-          icon:SetAtlas("common-icon-sound")
+
+          -- Version-based icon fallback: common-icon-sound (Midnight+) else speaker
+          local tocVersion = select(4, GetBuildInfo()) or 0
+          if tocVersion >= 120000 then
+            icon:SetAtlas("common-icon-sound")
+          else
+            icon:SetTexture("Interface/Common/VoiceChat-Speaker")
+          end
 
           playBtn:SetScript("OnClick", function()
             if opt.value then
