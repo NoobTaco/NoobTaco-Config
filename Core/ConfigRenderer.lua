@@ -110,11 +110,80 @@ local function GetFrame(type, parent)
       frame.Button:SetSize(200, 30)
 
       -- Custom button style for callout
-      frame.Button.bg:SetColorTexture(1, 0.82, 0, 1) -- Gold Button
-      frame.Button.Text:SetTextColor(0, 0, 0, 1)     -- Black Text
+      frame.Button.customColors = {
+        normal = { 1, 0.82, 0, 1 },         -- Gold
+        hover = { 1, 0.9, 0.2, 1 },         -- Lighter Gold
+        selected = { 0.8, 0.6, 0, 1 }       -- Darker Gold
+      }
+      Theme:UpdateButtonState(frame.Button) -- Apply immediately
+
+      -- Force Text Color to Black always (since gold button needs black text)
+      frame.Button.Text:SetTextColor(0, 0, 0, 1)
+
+      -- Override UpdateTheme to maintain black text
+      frame.Button.UpdateTheme = function(b)
+        Theme:UpdateButtonState(b)
+        b.Text:SetTextColor(0, 0, 0, 1)
+      end
+
+      frame.UpdateTheme = function(self)
+        Theme:ApplyFont(self.Title, "Bold", 14)
+        Theme:ApplyFont(self.Text, "Normal", 12)
+        -- Callout button is already themed/registered via CreateThemedButton,
+        -- but its colors are manually overridden in RenderItem usually.
+        -- We might need to persist those overrides or let them be custom?
+        -- For now, let's just ensure fonts update.
+      end
+      Theme:RegisterT(frame)
     else
       frame = CreateFrame("Frame", nil, parent)
     end
+  end
+
+  -- Initial Registration / UpdateTheme definition for other types
+  if not frame.UpdateTheme then
+    if type == "alert" then
+      frame.UpdateTheme = function(self)
+        local severity = self.severity or "info"
+        local r, g, b, a = Theme:GetAlertColor(severity)
+        self.bg:SetColorTexture(r, g, b, 0.2)
+        self.text:SetTextColor(r, g, b, 1)
+        Theme:ApplyFont(self.text, "Normal", 12)
+      end
+    elseif type == "header" then
+      frame.UpdateTheme = function(self)
+        Theme:ApplyFont(self.text, "Bold", 14)
+        self.text:SetTextColor(Theme:GetColor("header"))
+      end
+    elseif type == "description" then
+      frame.UpdateTheme = function(self)
+        Theme:ApplyFont(self.text, "Normal", 12)
+        self.text:SetTextColor(Theme:GetColor("text"))
+      end
+    elseif type == "checkbox" then
+      frame.UpdateTheme = function(self)
+        if self.Text then
+          Theme:ApplyFont(self.Text, "Normal", 12)
+          self.Text:SetTextColor(Theme:GetColor("text"))
+        end
+      end
+    elseif type == "slider" then
+      frame.UpdateTheme = function(self)
+        if self.Text then
+          Theme:ApplyFont(self.Text, "Normal", 12); self.Text:SetTextColor(Theme:GetColor("text"))
+        end
+        if self.Low then
+          Theme:ApplyFont(self.Low, "Normal", 10); self.Low:SetTextColor(Theme:GetColor("text"))
+        end
+        if self.High then
+          Theme:ApplyFont(self.High, "Normal", 10); self.High:SetTextColor(Theme:GetColor("text"))
+        end
+      end
+    end
+  end
+
+  if frame.UpdateTheme then
+    Theme:RegisterT(frame)
   end
 
   frame.type = type
@@ -274,10 +343,9 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
   local padding = 10
 
   if item.type == "alert" then
+    frame.severity = item.severity
     if item.text then frame.text:SetText(item.text) end
-    local r, g, b, a = Theme:GetAlertColor(item.severity)
-    frame.bg:SetColorTexture(r, g, b, 0.2)
-    frame.text:SetTextColor(r, g, b, 1)
+    if frame.UpdateTheme then frame:UpdateTheme() end
     if PixelUtil then PixelUtil.SetSize(frame, cursor.maxWidth, 30) else frame:SetSize(cursor.maxWidth, 30) end
   elseif item.type == "header" then
     if PixelUtil then PixelUtil.SetSize(frame, cursor.maxWidth, 30) else frame:SetSize(cursor.maxWidth, 30) end

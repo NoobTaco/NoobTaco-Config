@@ -20,12 +20,15 @@ function ConfigTest:Initialize()
     Settings.RegisterAddOnCategory(category)
 
     -- On Show, Render the Config
-    canvas:SetScript("OnShow", function()
-      if not canvas.isRendered then
+    local function TryRender()
+      if not canvas.isRendered and canvas:GetWidth() > 0 then
         self:RenderContent(canvas)
         canvas.isRendered = true
       end
-    end)
+    end
+
+    canvas:SetScript("OnShow", TryRender)
+    canvas:SetScript("OnSizeChanged", TryRender)
   end
 end
 
@@ -72,6 +75,45 @@ function ConfigTest:RenderContent(parent)
         buttonText = "GET IMPORT STRING",
         style = "Information",
         onButtonClick = function() print("Get Import String Clicked") end
+      },
+
+      { type = "header", label = "Theme Testing" },
+      {
+        type = "button",
+        label = "Apply Custom Theme",
+        onClick = function()
+          -- Create a deep copy of Default to avoid mutating it
+          local function deepCopy(orig)
+            local orig_type = type(orig)
+            local copy
+            if orig_type == 'table' then
+              copy = {}
+              for orig_key, orig_value in next, orig, nil do
+                copy[deepCopy(orig_key)] = deepCopy(orig_value)
+              end
+              setmetatable(copy, deepCopy(getmetatable(orig)))
+            else -- number, string, boolean, etc
+              copy = orig
+            end
+            return copy
+          end
+
+          local testTheme = deepCopy(AddOn.ConfigTheme.Presets.Default)
+          testTheme.alert.success = { 0, 1, 1, 1 }     -- Cyan for success
+          testTheme.button.normal = { 0.5, 0, 0.5, 1 } -- Purple Buttons
+
+          AddOn.ConfigTheme:RegisterTheme("TestTheme", testTheme)
+          AddOn.ConfigTheme:SetTheme("TestTheme")
+          print("Applied TestTheme (Cyan Success, Purple Buttons)")
+        end
+      },
+      {
+        type = "button",
+        label = "Reset Theme",
+        onClick = function()
+          AddOn.ConfigTheme:SetTheme("Default")
+          print("Reset to Default Theme")
+        end
       },
 
       { type = "header", label = "Developer Options" },

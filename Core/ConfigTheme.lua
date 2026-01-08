@@ -26,6 +26,7 @@ Theme.Presets = {
     alert = {
       warning = { 1, 0.6, 0, 1 },
       error = { 1, 0.2, 0.2, 1 },
+      success = { 0.2, 1, 0.2, 1 },
       info = { 0.2, 0.6, 1, 1 },
     }
   },
@@ -44,6 +45,7 @@ Theme.Presets = {
     alert = {
       warning = { 0.92, 0.80, 0.55, 1 }, -- Aurora Yellow
       error = { 0.75, 0.38, 0.45, 1 },   -- Aurora Red
+      success = { 0.63, 0.79, 0.58, 1 }, -- Aurora Green
       info = { 0.56, 0.73, 0.80, 1 },    -- Frost Blue
     }
   },
@@ -62,6 +64,7 @@ Theme.Presets = {
     alert = {
       warning = { 0.98, 0.78, 0.62, 1 }, -- Peach
       error = { 0.96, 0.48, 0.52, 1 },   -- Red
+      success = { 0.65, 0.82, 0.55, 1 }, -- Green
       info = { 0.53, 0.75, 1, 1 },       -- Sapphire
     }
   }
@@ -89,12 +92,22 @@ end
 
 function Theme:GetAlertColor(severity)
   local preset = self.Presets[self.Current] or self.Presets.Default
+  -- Normalize severity to lowercase for consistent lookup
+  severity = string.lower(severity or "info")
   local color = preset.alert[severity] or preset.alert.info
   return unpack(color)
 end
 
 function Theme:UpdateButtonState(btn)
-  local r, g, b, a = self:GetColor("button_" .. (btn.isSelected and "selected" or (btn.isHover and "hover" or "normal")))
+  local state = (btn.isSelected and "selected" or (btn.isHover and "hover" or "normal"))
+  local r, g, b, a
+
+  if btn.customColors and btn.customColors[state] then
+    r, g, b, a = unpack(btn.customColors[state])
+  else
+    r, g, b, a = self:GetColor("button_" .. state)
+  end
+
   btn.bg:SetColorTexture(r, g, b, a)
 end
 
@@ -103,6 +116,39 @@ function Theme:ApplyFont(fontString, weight, size)
   fontString:SetFont(self:GetFont(weight or "Normal"), size or 12, "")
 end
 
+-- Weak table to track objects that need theme updates
+Theme.ObjectRegistry = setmetatable({}, { __mode = "k" })
+
+function Theme:RegisterT(obj)
+  if obj and obj.UpdateTheme then
+    self.ObjectRegistry[obj] = true
+    obj:UpdateTheme() -- Initial apply
+  end
+end
+
+function Theme:ForceUpdate()
+  for obj in pairs(self.ObjectRegistry) do
+    if obj.UpdateTheme then
+      obj:UpdateTheme()
+    end
+  end
+end
+
+function Theme:SetTheme(themeName)
+  if self.Presets[themeName] then
+    self.Current = themeName
+
+    -- Update all registered objects
+    self:ForceUpdate()
+
+    -- Trigger refresh callback if needed
+    if self.OnThemeChanged then
+      self.OnThemeChanged()
+    end
+  end
+end
+
+-- Update CreateThemedButton to use the registry
 function Theme:CreateThemedButton(parent)
   local btn = CreateFrame("Button", nil, parent)
 
@@ -117,6 +163,14 @@ function Theme:CreateThemedButton(parent)
   text:SetPoint("CENTER")
   text:SetTextColor(self:GetColor("button_text"))
   btn.Text = text
+
+  -- Theme Update Method
+  btn.UpdateTheme = function(b)
+    self:UpdateButtonState(b)
+    if b.Text then
+      b.Text:SetTextColor(self:GetColor("button_text"))
+    end
+  end
 
   -- Scripts
   btn:SetScript("OnEnter", function(b)
@@ -140,18 +194,14 @@ function Theme:CreateThemedButton(parent)
     self:UpdateButtonState(b)
   end
 
-  -- Init
-  self:UpdateButtonState(btn)
+  -- Turn on registration
+  self:RegisterT(btn)
 
   return btn
 end
 
-function Theme:SetTheme(themeName)
-  if self.Presets[themeName] then
-    self.Current = themeName
-    -- Trigger refresh callback if needed
-    if self.OnThemeChanged then
-      self.OnThemeChanged()
-    end
+function Theme:RegisterTheme(name, themeData)
+  if name and themeData then
+    self.Presets[name] = themeData
   end
 end
