@@ -21,4 +21,15 @@ read_globals = {
     "strtrim",
     "strmatch"
 }
-exclude_files = {"Tests/**"}
+-- Exclude test files and installed rock dependencies
+exclude_files = {
+    "Tests/**", 
+    ".luarocks/**",
+    ".github/**"
+}
+
+-- Relax strictness for WoW addon development
+max_line_length = 140
+ignore = {
+    "212/self", -- Unused argument 'self' (common in WoW API)
+}
