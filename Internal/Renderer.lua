@@ -22,7 +22,7 @@ local PixelUtil = AddOn.PixelUtil or PixelUtil
 local FramePool = {}
 
 -- Reset frame state when retrieving from pool
-local function ResetFrame(frame, frameType)
+local function ResetFrame(frame, _)
   -- Clear common scripts to prevent stale handlers (use pcall since not all frames support all scripts)
   pcall(function() frame:SetScript("OnClick", nil) end)
   pcall(function() frame:SetScript("OnValueChanged", nil) end)
