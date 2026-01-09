@@ -1,4 +1,4 @@
-# NoobTaco-Config Library
+# Lib: NoobTaco-Config
 
 [![CI](https://github.com/NoobTaco/NoobTaco-Config/actions/workflows/ci.yml/badge.svg)](https://github.com/NoobTaco/NoobTaco-Config/actions/workflows/ci.yml) [![Release](https://github.com/NoobTaco/NoobTaco-Config/actions/workflows/release.yml/badge.svg)](https://github.com/NoobTaco/NoobTaco-Config/actions/workflows/release.yml)
 
