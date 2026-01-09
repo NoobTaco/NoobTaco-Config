@@ -1072,7 +1072,17 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
     frame.Description:SetWidth(width - contentLeft - 10)
 
     local descHeight = frame.Description:GetStringHeight()
-    if descHeight == 0 then descHeight = 40 end -- Fallback for fresh load (approx 3 lines)
+    if descHeight == 0 then
+      -- Improved fallback: estimate based on text length and width
+      local text = item.description or ""
+      local numChars = #text
+      local avgCharWidth = 6 -- Approx for 12pt font
+      -- Use calculated width for wrapping
+      local wrapWidth = width - contentLeft - 10
+      local charsPerLine = math.max(1, wrapWidth / avgCharWidth)
+      local lines = math.ceil(numChars / charsPerLine)
+      descHeight = lines * 14 -- Approx line height
+    end
 
     -- Links
     local linkHeight = 0
