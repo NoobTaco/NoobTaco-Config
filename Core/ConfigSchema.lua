@@ -26,6 +26,20 @@ function Schema:Validate(definition)
     return false, "Invalid schema type: " .. tostring(definition.type)
   end
 
+  -- Required ID check for interactive types
+  local interactiveTypes = {
+    ["checkbox"] = true,
+    ["slider"] = true,
+    ["dropdown"] = true,
+    ["editbox"] = true,
+    ["colorpicker"] = true,
+    ["media"] = true,
+  }
+
+  if definition.type and interactiveTypes[definition.type] and not definition.id then
+    return false, string.format("Type '%s' requires an 'id' field.", definition.type)
+  end
+
   -- Recursive check for children
   if definition.children then
     for i, child in ipairs(definition.children) do

@@ -218,6 +218,33 @@ local function GetFrame(type, parent)
       frame.Popup.Content = CreateFrame("Frame", nil, frame.Popup.ScrollFrame)
       frame.Popup.Content:SetSize(1, 1)
       frame.Popup.ScrollFrame:SetScrollChild(frame.Popup.Content)
+    elseif type == "dropdown_item" then
+      frame = CreateFrame("Button", nil, parent)
+      local hl = frame:CreateTexture(nil, "HIGHLIGHT")
+      hl:SetAllPoints()
+      hl:SetColorTexture(1, 0.82, 0, 0.2)
+
+      frame.Text = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+      Theme:ApplyFont(frame.Text, "Normal", 12)
+      frame.Text:SetPoint("LEFT", 5, 0)
+    elseif type == "media_item" then
+      frame = CreateFrame("Button", nil, parent)
+      local hl = frame:CreateTexture(nil, "HIGHLIGHT")
+      hl:SetAllPoints()
+      hl:SetColorTexture(1, 0.82, 0, 0.2)
+
+      frame.Text = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+      frame.Text:SetPoint("LEFT", 5, 0)
+
+      -- Play Button (Music Note)
+      local playBtn = CreateFrame("Button", nil, frame)
+      playBtn:SetSize(16, 16)
+      playBtn:SetPoint("RIGHT", -10, 0)
+      frame.PlayButton = playBtn
+
+      local icon = playBtn:CreateTexture(nil, "ARTWORK")
+      icon:SetAllPoints()
+      playBtn.Icon = icon
     elseif type == "callout" then
       frame = CreateFrame("Frame", nil, parent, "BackdropTemplate")
       frame:SetBackdrop({
@@ -456,12 +483,8 @@ local function GetFrame(type, parent)
   return frame
 end
 
-function ConfigRenderer:Clear(container)
-  local content = container.ContentChild
-  if not content then return end
-
-  -- Actually GetChildren returns varargs.
-  local childs = { content:GetChildren() }
+function ConfigRenderer:ReleaseChildren(parent)
+  local childs = { parent:GetChildren() }
   for _, child in ipairs(childs) do
     child:Hide()
     child:ClearAllPoints()
@@ -469,6 +492,13 @@ function ConfigRenderer:Clear(container)
       table.insert(FramePool[child.type], child)
     end
   end
+end
+
+function ConfigRenderer:Clear(container)
+  local content = container.ContentChild
+  if not content then return end
+
+  self:ReleaseChildren(content)
 
   -- Reset scroll child size?
   content:SetSize(1, 1)
@@ -644,26 +674,15 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
         frame.Popup:Hide()
       else
         local popupContent = frame.Popup.Content
-        local kids = { popupContent:GetChildren() }
-        for _, k in ipairs(kids) do
-          k:Hide(); k:ClearAllPoints()
-        end
+        ConfigRenderer:ReleaseChildren(popupContent)
 
         local yOff = 0
         local itemHeight = 20
         for _, opt in ipairs(item.options) do
-          local btn = CreateFrame("Button", nil, popupContent)
+          local btn = GetFrame("dropdown_item", popupContent)
           btn:SetSize(frame.Popup:GetWidth() - 25, itemHeight)
           btn:SetPoint("TOPLEFT", 5, yOff)
-
-          local hl = btn:CreateTexture(nil, "HIGHLIGHT")
-          hl:SetAllPoints()
-          hl:SetColorTexture(1, 0.82, 0, 0.2)
-
-          local txt = btn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-          Theme:ApplyFont(txt, "Normal", 12)
-          txt:SetPoint("LEFT", 5, 0)
-          txt:SetText(opt.label)
+          btn.Text:SetText(opt.label)
 
           btn:SetScript("OnClick", function()
             State:SetValue(item.id, opt.value)
@@ -696,29 +715,16 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
       else
         -- Populate Popup
         local popupContent = frame.Popup.Content
-        -- Clear existing children (simple way)
-        local kids = { popupContent:GetChildren() }
-        for _, k in ipairs(kids) do
-          k:Hide(); k:ClearAllPoints()
-        end
+        ConfigRenderer:ReleaseChildren(popupContent)
 
         local yOff = 0
         local itemHeight = 20
 
         for _, opt in ipairs(item.options) do
-          local btn = CreateFrame("Button", nil, popupContent)
+          local btn = GetFrame("media_item", popupContent)
           btn:SetSize(frame.Popup:GetWidth() - 25, itemHeight)
           btn:SetPoint("TOPLEFT", 5, yOff)
-
-          -- Highlight
-          local hl = btn:CreateTexture(nil, "HIGHLIGHT")
-          hl:SetAllPoints()
-          hl:SetColorTexture(1, 0.82, 0, 0.2)
-
-          -- Text
-          local txt = btn:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-          txt:SetPoint("LEFT", 5, 0)
-          txt:SetText(opt.label)
+          btn.Text:SetText(opt.label)
 
           -- Select Action
           btn:SetScript("OnClick", function()
@@ -727,13 +733,9 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
             frame.Popup:Hide()
           end)
 
-          -- Play Button (Music Note)
-          local playBtn = CreateFrame("Button", nil, btn)
-          playBtn:SetSize(16, 16)
-          playBtn:SetPoint("RIGHT", -10, 0)
-
-          local icon = playBtn:CreateTexture(nil, "ARTWORK")
-          icon:SetAllPoints()
+          -- Setup Play Button
+          local playBtn = btn.PlayButton
+          local icon = playBtn.Icon
 
           -- Version-based icon fallback: common-icon-sound (Midnight+) else speaker
           local tocVersion = select(4, GetBuildInfo()) or 0
