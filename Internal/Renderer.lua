@@ -403,11 +403,11 @@ local function GetFrame(frameType, parent)
     else
       frame = CreateFrame("Frame", nil, parent)
     end
-  end
 
-  -- Initial Registration / UpdateTheme definition for other types
-  if not frame.UpdateTheme then
-    if frameType == "alert" then
+    -- moved registration here to happen only once per frame lifetime
+    if frame.UpdateTheme then
+      Theme:RegisterT(frame)
+    elseif frameType == "alert" then
       frame.UpdateTheme = function(self)
         local severity = self.severity or "info"
         local r, g, b = Theme:GetAlertColor(severity)
@@ -415,16 +415,19 @@ local function GetFrame(frameType, parent)
         self.text:SetTextColor(r, g, b, 1)
         Theme:ApplyFont(self.text, "Normal", 12)
       end
+      Theme:RegisterT(frame)
     elseif frameType == "header" then
       frame.UpdateTheme = function(self)
         Theme:ApplyFont(self.text, "Bold", 14)
         self.text:SetTextColor(Theme:GetColor("header"))
       end
+      Theme:RegisterT(frame)
     elseif frameType == "description" then
       frame.UpdateTheme = function(self)
         Theme:ApplyFont(self.text, "Normal", 12)
         self.text:SetTextColor(Theme:GetColor("text"))
       end
+      Theme:RegisterT(frame)
     elseif frameType == "checkbox" then
       frame.UpdateTheme = function(self)
         if self.Text then
@@ -432,6 +435,7 @@ local function GetFrame(frameType, parent)
           self.Text:SetTextColor(Theme:GetColor("text"))
         end
       end
+      Theme:RegisterT(frame)
     elseif frameType == "editbox" then
       frame.UpdateTheme = function(self)
         Theme:ApplyFont(self.Label, "Normal", 12)
@@ -441,6 +445,7 @@ local function GetFrame(frameType, parent)
         local r, g, b = Theme:GetColor("border")
         self:SetBackdropBorderColor(r, g, b, 1)
       end
+      Theme:RegisterT(frame)
     elseif frameType == "dropdown" then
       frame.UpdateTheme = function(self)
         Theme:ApplyFont(self.Label, "Normal", 12)
@@ -450,6 +455,7 @@ local function GetFrame(frameType, parent)
         local r, g, b = Theme:GetColor("border")
         self:SetBackdropBorderColor(r, g, b, 1)
       end
+      Theme:RegisterT(frame)
     elseif frameType == "slider" then
       frame.UpdateTheme = function(self)
         if self.Text then
@@ -466,15 +472,14 @@ local function GetFrame(frameType, parent)
         end
         if self.Value then
           Theme:ApplyFont(self.Value, "Normal", 12)
-          self.Value:SetTextColor(Theme:GetColor("header")) -- Use header color for value highlight? Or maybe just text
+          self.Value:SetTextColor(Theme:GetColor("header"))
         end
         local r, g, b = Theme:GetColor("border")
         self:SetBackdropBorderColor(r, g, b, 1)
-
-        -- Thumb Highlight
         local hr, hg, hb = Theme:GetColor("highlight")
         if self.Thumb then self.Thumb:SetColorTexture(hr, hg, hb, 1) end
       end
+      Theme:RegisterT(frame)
     elseif frameType == "media" then
       frame.UpdateTheme = function(self)
         Theme:ApplyFont(self.Label, "Normal", 12)
@@ -482,11 +487,8 @@ local function GetFrame(frameType, parent)
         Theme:ApplyFont(self.Text, "Normal", 12)
         self.Text:SetTextColor(1, 1, 1)
       end
+      Theme:RegisterT(frame)
     end
-  end
-
-  if frame.UpdateTheme then
-    Theme:RegisterT(frame)
   end
 
   frame.type = frameType
@@ -546,6 +548,11 @@ function ConfigRenderer:Render(schema, container)
   -- Update Content Size to enable scrolling
   local totalHeight = math.abs(cursor.y) + cursor.rowHeight + 20
   content:SetSize(width, totalHeight)
+
+  -- Force scrollbar update to reflect new content height immediately
+  if container.UpdateScrollBar then
+    container:UpdateScrollBar()
+  end
 end
 
 function ConfigRenderer:RenderGroup(groupSchema, parent, cursor)
@@ -834,6 +841,7 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
     frame.text:SetWidth(cursor.maxWidth)                -- Fix width for wrap
     if item.text then frame.text:SetText(item.text) end -- Prioritize text prop or label
     local height = frame.text:GetStringHeight()
+    if height == 0 then height = 14 end                 -- Fallback for fresh load
     if PixelUtil then
       PixelUtil.SetSize(frame, cursor.maxWidth, height + 10)
     else
@@ -855,16 +863,18 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
         self:RenderItem(child, parent, rowCursor)
       end
       -- Update main cursor y to account for the row's total height consumption
-      -- If the row wrapped locally, rowCursor.y is already lower.
-      -- We must also consume the height of the current/last row line.
       cursor.y = rowCursor.y - rowCursor.rowHeight - 10 -- Add padding
       cursor.rowHeight = 0
       cursor.x = 10                                     -- Reset X for next main item
-      return                                            -- Skip default layout logic for row container itself
+
+      -- Hide the row frame itself if it was retrieved, as it's just a layout container
+      if frame then frame:Hide() end
+      return
     end
   elseif item.type == "callout" then
     frame.Text:SetWidth(cursor.maxWidth - 20)
     local textHeight = frame.Text:GetStringHeight()
+    if textHeight == 0 then textHeight = 14 end                 -- Fallback
     local totalHeight = 10 + 20 + 5 + textHeight + 10 + 30 + 10 -- Padding + Title + pad + Text + pad + Button + pad
     if PixelUtil then
       PixelUtil.SetSize(frame, cursor.maxWidth, totalHeight)
@@ -918,11 +928,14 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
     local contentLeft = 10 + iconSize + 15
     if not item.icon then contentLeft = 10 end
 
+    frame.Title:ClearAllPoints()
+    frame.Description:ClearAllPoints()
     frame.Title:SetPoint("TOPLEFT", contentLeft, -10)
     frame.Description:SetPoint("TOPLEFT", contentLeft, -45) -- Approx below Title
     frame.Description:SetWidth(width - contentLeft - 10)
 
     local descHeight = frame.Description:GetStringHeight()
+    if descHeight == 0 then descHeight = 40 end -- Fallback for fresh load (approx 3 lines)
 
     -- Links
     local linkHeight = 0
@@ -939,33 +952,33 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
       frame.Links:SetPoint("RIGHT", -10, 0)
       frame.Links:SetHeight(30)
 
-      -- Clear old links
+      -- Reuse/Create new links
       local kids = { frame.Links:GetChildren() }
-      for _, k in ipairs(kids) do
-        k:Hide(); k:ClearAllPoints()
-      end
-
-      -- Create new links
       local numLinks = #item.links
       local btnWidth = 100
       local gap = 10
       local totalLinkWidth = (numLinks * btnWidth) + ((numLinks - 1) * gap)
-      local availableWidth = width - 20 -- Padding
+      local availableWidth = width - 20
       local startX = (availableWidth - totalLinkWidth) / 2
 
       local lx = startX
-      for _, link in ipairs(item.links) do
-        local btn = Theme:CreateThemedButton(frame.Links)
+      for i, link in ipairs(item.links) do
+        local btn = kids[i]
+        if not btn then
+          btn = Theme:CreateThemedButton(frame.Links)
+        end
+        btn:Show()
+
+        local labelText = link.label or ""
         if btn.Text then
-          btn.Text:SetText(link.label)
-        else
-          btn:SetText(link.label)
+          btn.Text:SetText(labelText)
+        elseif btn.SetText then
+          btn:SetText(labelText)
         end
 
         btn:SetSize(btnWidth, 24)
         btn:SetPoint("LEFT", lx, 0)
 
-        -- Ensure style is updated
         if Theme.UpdateButtonState then
           Theme:UpdateButtonState(btn)
         end
@@ -973,10 +986,14 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
         btn:SetScript("OnClick", function()
           if link.url then
             print("Opening Link: " .. link.url)
-            -- StaticPopup_Show("COPY_URL", nil, nil, link.url)
           end
         end)
         lx = lx + btnWidth + gap
+      end
+
+      -- Hide extra buttons
+      for i = numLinks + 1, #kids do
+        kids[i]:Hide()
       end
     else
       frame.Links:Hide()

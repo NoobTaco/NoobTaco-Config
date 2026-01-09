@@ -213,7 +213,11 @@ end
 local function TruncateText(fontString, text, maxWidth)
   if not fontString or not text then return end
   fontString:SetText(text)
-  if fontString:GetStringWidth() <= maxWidth then return end
+
+  -- If width is not yet initialized (0), we cannot truncate accurately.
+  -- Defer or use full text.
+  local currentWidth = fontString:GetStringWidth()
+  if currentWidth == 0 or currentWidth <= maxWidth then return end
 
   local length = string.len(text)
   while length > 0 and fontString:GetStringWidth() > maxWidth do
@@ -302,16 +306,16 @@ function Theme:CreateThemedButton(parent)
     self:UpdateButtonState(b)
   end
 
-  btn.SetLabel = function(b, text)
-    b.fullText = text
-    local width = b:GetWidth()
+  btn.SetLabel = function(b, newText)
+    b.fullText = newText
+    local currentWidth = b:GetWidth()
     local padding = 10
-    if width > 0 then
-      TruncateText(b.Text, text, width - padding)
+    if currentWidth > 0 then
+      TruncateText(b.Text, newText, currentWidth - padding)
     else
       -- If width is not yet set, set text directly and hope for the best,
       -- or rely on a later call when width is known.
-      b.Text:SetText(text)
+      b.Text:SetText(newText)
     end
   end
 

@@ -5,6 +5,13 @@
 - **NoobTaco Theme**: New default "NoobTaco" theme based on Digital Taco UI Kit Specs, featuring Charcoal Navy glassmorphism and Burnt Sienna highlights.
 - **Improved Theming**: Added support for 4th color channel (alpha) in theme presets.
 
+### Fixed
+- **Rendering Instability**: Added fallbacks for initial zero-width/height states on fresh load to prevent component clumping.
+- **Scrollbar Visibility**: Fixed an issue where the scrollbar was invisible or improperly colored on initial load.
+- **Conflicting Anchors**: Resolved an issue in the About component where overlapping anchors pushed content off-screen.
+- **Memory Optimization**: Reimplemented About page link management to reuse buttons instead of creating new ones on every render.
+- **Header "Cycling"**: Fixed a bug where headers would flicker or disappear when interacting with sidebar buttons.
+
 ## [1.0.0] - 2026-01-08
 ### Added
 - **Theme Registration**: Developers can now register custom themes using `AddOn.ConfigTheme:RegisterTheme`.

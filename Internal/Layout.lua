@@ -63,8 +63,8 @@ function ConfigLayout:CreateTwoColumnLayout(parent)
   scrollBar.UpdateTheme = function(sb)
     local r, g, b = Theme:GetColor("border")
     sb.thumb:SetColorTexture(r, g, b, 0.8)
-    local br, bg, bb = Theme:GetColor("background")
-    sb.bg:SetColorTexture(br, bg, bb, 0.3)
+    local br, b_g, bb = Theme:GetColor("background")
+    sb.bg:SetColorTexture(br, b_g, bb, 0.3)
   end
   Theme:RegisterT(scrollBar)
 
@@ -75,16 +75,8 @@ function ConfigLayout:CreateTwoColumnLayout(parent)
     content:SetVerticalScroll(value)
   end)
 
-  content:SetScript("OnScrollRangeChanged", function(_, _, yrange)
-    scrollBar:SetMinMaxValues(0, yrange)
-    if yrange > 0 then
-      local thumbHeight = math.max(20, (content:GetHeight() / (content:GetHeight() + yrange)) * content:GetHeight())
-      thumb:SetHeight(thumbHeight)
-      scrollBar:Show()
-    else
-      scrollBar:Hide()
-      scrollBar:SetValue(0)
-    end
+  content:SetScript("OnScrollRangeChanged", function(_, _, _)
+    container:UpdateScrollBar()
   end)
 
   content:SetScript("OnVerticalScroll", function(_, offset)
@@ -96,6 +88,28 @@ function ConfigLayout:CreateTwoColumnLayout(parent)
     local step = 40
     scrollBar:SetValue(current - (delta * step))
   end)
+
+  function container.UpdateScrollBar()
+    local yrange = content:GetVerticalScrollRange()
+    scrollBar:SetMinMaxValues(0, yrange)
+
+    local contentHeight = content:GetHeight()
+    if contentHeight == 0 then
+      -- Defer or use fallback if not yet measured
+      contentHeight = parent:GetHeight() - 20
+    end
+
+    if yrange > 0 and contentHeight > 0 then
+      local thumbHeight = math.max(20, (contentHeight / (contentHeight + yrange)) * contentHeight)
+      thumb:SetHeight(thumbHeight)
+      scrollBar:Show()
+      -- Force theme update to ensure it's colored
+      if scrollBar.UpdateTheme then scrollBar:UpdateTheme() end
+    else
+      scrollBar:Hide()
+      scrollBar:SetValue(0)
+    end
+  end
 
   scrollBar:Hide()
 
