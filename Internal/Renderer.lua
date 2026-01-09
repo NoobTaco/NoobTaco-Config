@@ -573,25 +573,9 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
       -- frame.Text:SetText(item.label) -- Handled later after sizing
 
       -- Handle styling
-      local styleColors = nil
-      if item.style then
-        styleColors = Theme:GetButtonColorsForStyle(item.style)
-      end
-
-      if styleColors or item.customColors then
-        -- Merge custom colors over style colors if both exist
-        local finalColors = styleColors or {}
-        if item.customColors then
-          for k, v in pairs(item.customColors) do
-            finalColors[k] = v
-          end
-        end
-        frame.customColors = finalColors
-        Theme:UpdateButtonState(frame)
-      else
-        frame.customColors = nil
-        Theme:UpdateButtonState(frame)
-      end
+      frame.style = item.style
+      frame.customColors = item.customColors
+      Theme:UpdateButtonState(frame)
     end
   end
 

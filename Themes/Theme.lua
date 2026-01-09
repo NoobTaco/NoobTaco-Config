@@ -18,22 +18,22 @@ Theme.Fonts = {
 
 Theme.Presets = {
   Default = {
-    background = { 0.1, 0.1, 0.1, 0.9 },
-    header = { 1, 0.82, 0, 1 }, -- Gold (same as highlight)
-    border = { 0.4, 0.4, 0.4, 1 },
+    background = { 0.05, 0.05, 0.05, 0.95 },
+    header = { 1, 0.82, 0, 1 }, -- Blizzard Gold
+    border = { 0.25, 0.25, 0.25, 1 },
     text = { 1, 1, 1, 1 },
     highlight = { 1, 0.82, 0, 1 },
     button = {
-      normal = { 0.2, 0.2, 0.2, 1 },
-      hover = { 0.3, 0.3, 0.3, 1 },
-      selected = { 0.2, 0.6, 1, 1 },
+      normal = { 0.15, 0.15, 0.15, 1 },
+      hover = { 0.25, 0.25, 0.25, 1 },
+      selected = { 0.75, 0.61, 0, 1 }, -- Muted Blizzard Gold
       text = { 1, 1, 1, 1 },
     },
     alert = {
-      warning = { 1, 0.6, 0, 1 },
-      error = { 1, 0.2, 0.2, 1 },
-      success = { 0.2, 1, 0.2, 1 },
-      info = { 0.2, 0.6, 1, 1 },
+      warning = { 1, 0.82, 0, 1 },    -- Blizzard Gold
+      error = { 1, 0.1, 0.1, 1 },     -- Blizzard Red
+      success = { 0.1, 1, 0.1, 1 },   -- Blizzard Green
+      info = { 0.21, 0.44, 0.86, 1 }, -- Blizzard Blue
     }
   },
   Nord = {
@@ -151,6 +151,32 @@ end
 function Theme:UpdateButtonState(btn)
   local state = (btn.isSelected and "selected" or (btn.isHover and "hover" or "normal"))
   local r, g, b, a
+
+  -- If the button has a style, we re-evaluate the colors from the theme
+  -- This ensures it updates when the theme changes.
+  if btn.style then
+    local colors = self:GetButtonColorsForStyle(btn.style)
+    if colors then
+      local tr, tg, tb, ta
+      -- SPECIAL CASE: For sidebar buttons, we might want 'normal' to stay neutral
+      -- unless it's selected/hovered to avoid it looking "stuck" in highlight mode.
+      if btn.isSidebar and state == "normal" then
+        r, g, b, a = self:GetColor("button_normal")
+        tr, tg, tb, ta = self:GetColor("button_text")
+      else
+        r, g, b, a = unpack(colors[state] or colors.normal)
+        tr, tg, tb, ta = unpack(colors.text or { 1, 1, 1, 1 })
+      end
+
+      -- Text color handling for styles
+      if btn.Text then
+        btn.Text:SetTextColor(tr, tg, tb, ta)
+      end
+
+      btn.bg:SetColorTexture(r, g, b, a)
+      return
+    end
+  end
 
   if btn.customColors and btn.customColors[state] then
     r, g, b, a = unpack(btn.customColors[state])

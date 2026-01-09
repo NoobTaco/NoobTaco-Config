@@ -25,8 +25,14 @@ function ConfigLayout:CreateTwoColumnLayout(parent)
   -- Sidebar Background
   local sidebarBg = sidebar:CreateTexture(nil, "BACKGROUND")
   sidebarBg:SetAllPoints()
-  sidebarBg:SetColorTexture(0.1, 0.1, 0.1, 0.5) -- Placeholder
   sidebar.bg = sidebarBg
+
+  -- Sidebar Theme Update
+  sidebar.UpdateTheme = function(s)
+    local r, g, b = Theme:GetColor("background")
+    s.bg:SetColorTexture(r, g, b, 0.4) -- Darkened background for sidebar
+  end
+  Theme:RegisterT(sidebar)
 
   -- Content (Right)
   local content = CreateFrame("ScrollFrame", nil, container)
@@ -47,10 +53,20 @@ function ConfigLayout:CreateTwoColumnLayout(parent)
   thumb:SetColorTexture(0.4, 0.4, 0.4, 0.8)
   thumb:SetSize(6, 30)
   scrollBar:SetThumbTexture(thumb)
+  scrollBar.thumb = thumb
 
   local bg = scrollBar:CreateTexture(nil, "BACKGROUND")
   bg:SetAllPoints()
-  bg:SetColorTexture(0.1, 0.1, 0.1, 0.5)
+  scrollBar.bg = bg
+
+  -- ScrollBar Theme Update
+  scrollBar.UpdateTheme = function(sb)
+    local r, g, b = Theme:GetColor("border")
+    sb.thumb:SetColorTexture(r, g, b, 0.8)
+    local br, bg, bb = Theme:GetColor("background")
+    sb.bg:SetColorTexture(br, bg, bb, 0.3)
+  end
+  Theme:RegisterT(scrollBar)
 
   scrollBar:SetObeyStepOnDrag(true)
   scrollBar:SetValueStep(1)
@@ -93,13 +109,22 @@ function ConfigLayout:CreateTwoColumnLayout(parent)
   return container
 end
 
-function ConfigLayout:AddSidebarButton(container, id, label, onClick)
+function ConfigLayout:AddSidebarButton(container, id, label, onClick, style, customColors)
   local sidebar = container.Sidebar
   local count = sidebar.buttonCount or 0
 
   local btn = Theme:CreateThemedButton(sidebar)
   btn:SetSize(180, 30)
   btn:SetPoint("TOP", sidebar, "TOP", 0, -10 - (count * 35))
+
+  -- Handle styling
+  btn.style = style
+  btn.isSidebar = true
+
+  if customColors then
+    btn.customColors = customColors
+  end
+  Theme:UpdateButtonState(btn)
 
   btn.Text:SetText(label)
   btn.id = id
