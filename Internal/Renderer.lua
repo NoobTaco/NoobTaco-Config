@@ -20,6 +20,36 @@ local PixelUtil = AddOn.PixelUtil or PixelUtil
 
 -- Simple Object Pool
 local FramePool = {}
+
+-- Reset frame state when retrieving from pool
+local function ResetFrame(frame, frameType)
+  -- Clear common scripts to prevent stale handlers (use pcall since not all frames support all scripts)
+  pcall(function() frame:SetScript("OnClick", nil) end)
+  pcall(function() frame:SetScript("OnValueChanged", nil) end)
+  pcall(function() frame:SetScript("OnEnter", nil) end)
+  pcall(function() frame:SetScript("OnLeave", nil) end)
+  pcall(function() frame:SetScript("OnEditFocusLost", nil) end)
+  pcall(function() frame:SetScript("OnTextChanged", nil) end)
+
+  -- Clear text content for common sub-elements
+  if frame.text then frame.text:SetText("") end
+  if frame.Text then frame.Text:SetText("") end
+  if frame.Title then frame.Title:SetText("") end
+  if frame.Label then frame.Label:SetText("") end
+  if frame.Low then frame.Low:SetText("") end
+  if frame.High then frame.High:SetText("") end
+  if frame.Value then frame.Value:SetText("") end
+
+  -- Clear custom properties
+  frame.style = nil
+  frame.customColors = nil
+  frame.severity = nil
+  frame.expanded = nil
+
+  -- Reset visibility
+  frame:Show()
+end
+
 local function GetFrame(frameType, parent)
   if not FramePool[frameType] then FramePool[frameType] = {} end
   local pool = FramePool[frameType]
@@ -91,6 +121,48 @@ local function GetFrame(frameType, parent)
       frame.line:SetColorTexture(1, 1, 1, 0.2)
       frame.line:SetPoint("TOPLEFT", frame.text, "BOTTOMLEFT", 0, -5)
       frame.line:SetPoint("RIGHT", frame, "RIGHT", 0, 0)
+    elseif frameType == "card" then
+      -- Card container with header and bordered content area
+      frame = CreateFrame("Frame", nil, parent, "BackdropTemplate")
+      frame:SetBackdrop({
+        bgFile = "Interface/Buttons/WHITE8X8",
+        edgeFile = "Interface/Buttons/WHITE8X8",
+        edgeSize = 1,
+        insets = { left = 1, right = 1, top = 1, bottom = 1 }
+      })
+      frame:SetBackdropColor(0.1, 0.1, 0.12, 0.8) -- Slightly transparent dark background
+      frame:SetBackdropBorderColor(0.3, 0.3, 0.3, 1)
+
+      -- Header bar at top (inset by 1px to not cover border)
+      frame.Header = CreateFrame("Frame", nil, frame)
+      frame.Header:SetPoint("TOPLEFT", 1, -1)
+      frame.Header:SetPoint("TOPRIGHT", -1, -1)
+      frame.Header:SetHeight(28)
+
+      frame.HeaderBg = frame.Header:CreateTexture(nil, "BACKGROUND")
+      frame.HeaderBg:SetAllPoints()
+      frame.HeaderBg:SetColorTexture(0.15, 0.15, 0.2, 1) -- Darker header
+
+      frame.Title = frame.Header:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+      Theme:ApplyFont(frame.Title, "Bold", 13)
+      frame.Title:SetPoint("LEFT", 9, 0)
+      frame.Title:SetTextColor(0.6, 0.7, 0.8) -- Blue/Grey text
+
+      -- Content area for children (inset from border)
+      frame.Content = CreateFrame("Frame", nil, frame)
+      frame.Content:SetPoint("TOPLEFT", frame.Header, "BOTTOMLEFT", 9, -10)
+      frame.Content:SetPoint("BOTTOMRIGHT", -10, 10)
+
+      -- Theme Update for Card
+      frame.UpdateTheme = function(self)
+        Theme:ApplyFont(self.Title, "Bold", 13)
+        local r, g, b = Theme:GetColor("button_normal")
+        self.HeaderBg:SetColorTexture(r, g, b, 1)
+        local br, b_g, bb = Theme:GetColor("border")
+        self:SetBackdropBorderColor(br, b_g, bb, 1)
+        self:SetBackdropColor(0.1, 0.1, 0.12, 0.8)
+      end
+      Theme:RegisterT(frame)
     elseif frameType == "editbox" then
       frame = CreateFrame("EditBox", nil, parent, "BackdropTemplate")
       frame:SetAutoFocus(false)
@@ -314,44 +386,6 @@ local function GetFrame(frameType, parent)
         Theme:UpdateButtonState(self.Button)
       end
       Theme:RegisterT(frame)
-    elseif frameType == "expandable" then
-      frame = CreateFrame("Button", nil, parent, "BackdropTemplate")
-      frame:SetBackdrop({
-        bgFile = "Interface/Buttons/WHITE8X8",
-        edgeFile = "Interface/Buttons/WHITE8X8",
-        edgeSize = 1,
-        insets = { left = 1, right = 1, top = 1, bottom = 1 }
-      })
-      frame:SetBackdropColor(0.15, 0.15, 0.2, 1) -- Slightly lighter/bluish dark
-      frame:SetBackdropBorderColor(0.3, 0.3, 0.3, 1)
-
-      frame.Title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-      Theme:ApplyFont(frame.Title, "Bold", 13)
-      frame.Title:SetPoint("LEFT", 10, 0)
-      frame.Title:SetTextColor(0.6, 0.7, 0.8) -- Blue/Grey
-
-      -- Expand/Collapse Icon
-      frame.Icon = frame:CreateTexture(nil, "ARTWORK")
-      frame.Icon:SetSize(16, 16)
-      frame.Icon:SetPoint("RIGHT", -10, 0)
-      frame.Icon:SetTexture("Interface/Buttons/UI-PlusButton-Up")
-
-      -- Status Badge
-      frame.Status = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-      Theme:ApplyFont(frame.Status, "Bold", 10)
-      frame.Status:SetPoint("RIGHT", frame.Icon, "LEFT", -10, 0)
-      frame.Status:SetTextColor(0.5, 0.5, 0.5)
-
-      -- Highlight
-      frame.hl = frame:CreateTexture(nil, "HIGHLIGHT")
-      frame.hl:SetAllPoints()
-      frame.hl:SetColorTexture(1, 1, 1, 0.05)
-
-      -- Theme Update for Expandable
-      frame.UpdateTheme = function(self)
-        Theme:ApplyFont(self.Title, "Bold", 13)
-        Theme:ApplyFont(self.Status, "Bold", 10)
-      end
     elseif frameType == "about" then
       frame = CreateFrame("Frame", nil, parent, "BackdropTemplate")
       frame:SetBackdrop({
@@ -393,7 +427,6 @@ local function GetFrame(frameType, parent)
       frame.Links = CreateFrame("Frame", nil, frame)
       frame.Links:SetPoint("TOPLEFT", frame.Icon, "BOTTOMLEFT", 0, -15)
       frame.Links:SetSize(1, 30)
-
       frame.UpdateTheme = function(self)
         Theme:ApplyFont(self.Title, "Bold", 24)
         Theme:ApplyFont(self.Version, "Normal", 12)
@@ -491,6 +524,11 @@ local function GetFrame(frameType, parent)
     end
   end
 
+  -- Reset state if retrieved from pool
+  if frame.type then
+    ResetFrame(frame, frameType)
+  end
+
   frame.type = frameType
   frame:SetParent(parent)
   frame:Show()
@@ -500,6 +538,19 @@ end
 function ConfigRenderer:ReleaseChildren(parent)
   local childs = { parent:GetChildren() }
   for _, child in ipairs(childs) do
+    -- Recursively release nested content frames (e.g., card.Content)
+    if child.Content then
+      self:ReleaseChildren(child.Content)
+    end
+
+    -- Clear scripts before returning to pool (use pcall since not all frames support all scripts)
+    pcall(function() child:SetScript("OnClick", nil) end)
+    pcall(function() child:SetScript("OnValueChanged", nil) end)
+    pcall(function() child:SetScript("OnEnter", nil) end)
+    pcall(function() child:SetScript("OnLeave", nil) end)
+    pcall(function() child:SetScript("OnEditFocusLost", nil) end)
+    pcall(function() child:SetScript("OnTextChanged", nil) end)
+
     child:Hide()
     child:ClearAllPoints()
     if child.type and FramePool[child.type] then
@@ -590,36 +641,6 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
     frame.Title:SetText(item.title)
     frame.Text:SetText(item.text)
     frame.Button.Text:SetText(item.buttonText or "Click Me")
-  end
-
-  if item.type == "expandable" then
-    frame.Title:SetText(item.label)
-    if item.status then
-      frame.Status:SetText(item.status)
-      frame.Status:Show()
-    else
-      frame.Status:Hide()
-    end
-
-    if item.expanded then
-      frame.Icon:SetTexture("Interface/Buttons/UI-MinusButton-Up")
-      -- Lighter background for expanded
-      local r, g, b = 0.25, 0.25, 0.25 -- Manual lighten
-      if Theme then
-        local tr, tg, tb = Theme:GetColor("button_hover")
-        r, g, b = tr, tg, tb
-      end
-      frame:SetBackdropColor(r, g, b, 1)
-    else
-      frame.Icon:SetTexture("Interface/Buttons/UI-PlusButton-Up")
-      -- Standard background for collapsed
-      local r, g, b = 0.2, 0.2, 0.2
-      if Theme then
-        local tr, tg, tb = Theme:GetColor("button_normal")
-        r, g, b = tr, tg, tb
-      end
-      frame:SetBackdropColor(r, g, b, 1)
-    end
   end
 
   -- State Binding & Actions
@@ -819,11 +840,6 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
 
     -- Force update to apply severity colors
     if frame.UpdateTheme then frame:UpdateTheme() end
-  elseif item.type == "expandable" then
-    frame:SetScript("OnClick", function()
-      item.expanded = not item.expanded
-      self:Render(self.currentSchema, self.currentContainer)
-    end)
   end
 
 
@@ -837,16 +853,44 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
     if PixelUtil then PixelUtil.SetSize(frame, cursor.maxWidth, 30) else frame:SetSize(cursor.maxWidth, 30) end
   elseif item.type == "header" then
     if PixelUtil then PixelUtil.SetSize(frame, cursor.maxWidth, 30) else frame:SetSize(cursor.maxWidth, 30) end
+  elseif item.type == "card" then
+    frame.Title:SetText(item.label or "")
+
+    -- Calculate content height by rendering children into content frame
+    local contentHeight = 10 -- Initial padding
+    if item.children then
+      local childCursor = { x = 0, y = 0, rowHeight = 0, maxWidth = cursor.maxWidth - 20 }
+      for _, child in ipairs(item.children) do
+        self:RenderItem(child, frame.Content, childCursor)
+      end
+      -- Calculate total height from cursor
+      contentHeight = math.abs(childCursor.y) + childCursor.rowHeight + 20
+    end
+
+    local totalHeight = 30 + contentHeight -- Header height + content
+    if PixelUtil then
+      PixelUtil.SetSize(frame, cursor.maxWidth, totalHeight)
+    else
+      frame:SetSize(cursor.maxWidth,
+        totalHeight)
+    end
   elseif item.type == "description" then
     frame.text:SetWidth(cursor.maxWidth)                -- Fix width for wrap
     if item.text then frame.text:SetText(item.text) end -- Prioritize text prop or label
     local height = frame.text:GetStringHeight()
-    if height == 0 then height = 14 end                 -- Fallback for fresh load
+    if height == 0 then
+      -- Improved fallback: estimate based on text length and width
+      local text = item.text or item.label or ""
+      local numChars = #text
+      local avgCharWidth = 6 -- Approx for 12pt font
+      local charsPerLine = math.max(1, cursor.maxWidth / avgCharWidth)
+      local lines = math.ceil(numChars / charsPerLine)
+      height = lines * 14
+    end
     if PixelUtil then
       PixelUtil.SetSize(frame, cursor.maxWidth, height + 10)
     else
-      frame:SetSize(cursor.maxWidth,
-        height + 10)
+      frame:SetSize(cursor.maxWidth, height + 10)
     end
   elseif item.type == "row" then
     -- Handle Row Layout
@@ -898,12 +942,6 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
       PixelUtil.SetSize(frame, w, h)
     else
       frame:SetSize(w, h)
-    end
-  elseif item.type == "expandable" then
-    if PixelUtil then
-      PixelUtil.SetSize(frame, cursor.maxWidth, 30)
-    else
-      frame:SetSize(cursor.maxWidth, 30)
     end
   elseif item.type == "about" then
     -- Populate Data
@@ -1082,32 +1120,4 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
   -- Update Cursor
   cursor.x = cursor.x + effectiveWidth + padding
   cursor.rowHeight = math.max(cursor.rowHeight, effectiveHeight)
-
-  -- Specific Logic for Expandable Children
-  if item.type == "expandable" and item.expanded and item.children then
-    -- Force new row for children
-    cursor.x = 10
-    cursor.y = cursor.y - cursor.rowHeight - 5
-    cursor.rowHeight = 0
-
-    -- Indent
-    local indent = 30
-    local childCursor = {
-      x = cursor.x + indent,
-      y = cursor.y,
-      rowHeight = 0,
-      maxWidth = cursor.maxWidth - indent
-    }
-
-    -- Background for content?
-    -- Currently just rendering in flow.
-    for _, child in ipairs(item.children) do
-      self:RenderItem(child, parent, childCursor)
-    end
-
-    -- Recover cursor for next sibling item
-    cursor.y = childCursor.y - 10 -- Add Buffer Padding after children
-    cursor.rowHeight = 0
-    cursor.x = 10
-  end
 end

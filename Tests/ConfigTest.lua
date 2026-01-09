@@ -4,38 +4,17 @@ local ConfigTest = {}
 -- Only load if Config Lib is present
 if not AddOn.ConfigRenderer then return end
 
-function ConfigTest:Initialize()
-  local categoryName = "NoobTaco Config Test"
+-- ============================================================================
+-- PERSISTENT SCHEMAS
+-- These are defined once and persist across reloads/re-renders.
+-- This prevents closures from capturing stale local references.
+-- ============================================================================
+ConfigTest.Schemas = {}
 
-  -- Create the Canvas Frame
-  local canvas = CreateFrame("Frame", nil, UIParent)
-  canvas:SetSize(800, 600)
+local function BuildSchemas()
+  if ConfigTest.Schemas.General then return end -- Already built
 
-  -- Register with WoW Settings API (Dragonflight/WarWithin)
-  -- Note: This requires the new Settings API.
-  -- If running on vanilla/classic, this might need fallback, but request was for 11.x
-
-  if Settings and Settings.RegisterCanvasLayoutCategory then
-    local category, layout = Settings.RegisterCanvasLayoutCategory(canvas, categoryName)
-    Settings.RegisterAddOnCategory(category)
-
-    -- On Show, Render the Config
-    local function TryRender()
-      local width = canvas:GetWidth()
-      -- Only render if width is valid and changed
-      if width > 10 and (not canvas.lastRenderedWidth or math.abs(canvas.lastRenderedWidth - width) > 5) then
-        self:RenderContent(canvas)
-        canvas.lastRenderedWidth = width
-      end
-    end
-
-    canvas:SetScript("OnShow", TryRender)
-    canvas:SetScript("OnSizeChanged", TryRender)
-  end
-end
-
-function ConfigTest:RenderContent(parent)
-  local GeneralSchema = {
+  ConfigTest.Schemas.General = {
     type = "group",
     children = {
       { type = "header",      label = "General Settings" },
@@ -69,7 +48,7 @@ function ConfigTest:RenderContent(parent)
     }
   }
 
-  local AdvancedSchema = {
+  ConfigTest.Schemas.Advanced = {
     type = "group",
     children = {
       { type = "header", label = "Advanced Configuration 2" },
@@ -176,7 +155,7 @@ function ConfigTest:RenderContent(parent)
     }
   }
 
-  local AboutSchema = {
+  ConfigTest.Schemas.About = {
     type = "group",
     children = {
       {
@@ -208,24 +187,25 @@ function ConfigTest:RenderContent(parent)
     }
   }
 
-  local ProfilesSchema = {
+  ConfigTest.Schemas.Profiles = {
     type = "group",
     children = {
-      { type = "header", label = "INDIVIDUAL ADDON PROFILES" },
+      { type = "header",      label = "ADDON PROFILES" },
+      { type = "description", text = "Configure profiles for compatible addons. Each addon section shows import/export options and customization settings." },
+
       {
-        type = "expandable",
+        type = "card",
         label = "BetterBlizzFrames",
-        expanded = false,
         children = {
-          { type = "description", text = "Profile content for BetterBlizzFrames would go here." }
+          { type = "description", text = "Profile content for BetterBlizzFrames would go here." },
         }
       },
+
       {
-        type = "expandable",
+        type = "card",
         label = "Cooldown Manager Tweaks",
-        status = "NOT LOADED",
-        expanded = false,
         children = {
+          { type = "alert", severity = "info", text = "NOT LOADED - This addon is not currently installed." },
           {
             type = "description",
             text =
@@ -253,26 +233,30 @@ function ConfigTest:RenderContent(parent)
                 onClick = function() print("Link: https://curseforge.com/...") end
               }
             }
-          }
+          },
         }
       },
+
       {
-        type = "expandable",
+        type = "card",
         label = "Details! Damage Meter",
-        status = "NOT LOADED",
-        expanded = false,
-        children = {}
+        children = {
+          { type = "alert",       severity = "info",                                                                               text = "NOT LOADED - This addon is not currently installed." },
+          { type = "description", text = "Profile content for Details! Damage Meter will appear here when the addon is installed." },
+        }
       },
+
       {
-        type = "expandable",
+        type = "card",
         label = "Platynator",
-        expanded = false,
-        children = {}
-      }
+        children = {
+          { type = "description", text = "Profile content for Platynator will appear here." },
+        }
+      },
     }
   }
 
-  local ButtonsSchema = {
+  ConfigTest.Schemas.Buttons = {
     type = "group",
     children = {
       { type = "header",      label = "Button Style Variations" },
@@ -405,8 +389,58 @@ function ConfigTest:RenderContent(parent)
       },
     }
   }
+end
 
-  -- Initialize State with Dummy DB
+-- ============================================================================
+-- INITIALIZATION
+-- ============================================================================
+function ConfigTest:Initialize()
+  local categoryName = "NoobTaco Config Test"
+
+  -- Build schemas once
+  BuildSchemas()
+
+  -- Create the Canvas Frame
+  local canvas = CreateFrame("Frame", nil, UIParent)
+  canvas:SetSize(800, 600)
+
+  -- Register with WoW Settings API (Dragonflight/WarWithin)
+  if Settings and Settings.RegisterCanvasLayoutCategory then
+    local category = Settings.RegisterCanvasLayoutCategory(canvas, categoryName)
+    Settings.RegisterAddOnCategory(category)
+
+    -- Deferred first render to allow WoW layout to stabilize
+    local hasRenderedOnce = false
+
+    local function TryRender()
+      local width = canvas:GetWidth()
+      -- Only render if width is valid and changed significantly
+      if width > 10 and (not canvas.lastRenderedWidth or math.abs(canvas.lastRenderedWidth - width) > 5) then
+        self:RenderContent(canvas)
+        canvas.lastRenderedWidth = width
+      end
+    end
+
+    canvas:SetScript("OnShow", function()
+      if not hasRenderedOnce then
+        -- Defer the FIRST render slightly to let WoW complete its layout pass
+        C_Timer.After(0, function()
+          TryRender()
+          hasRenderedOnce = true
+        end)
+      else
+        TryRender()
+      end
+    end)
+
+    canvas:SetScript("OnSizeChanged", TryRender)
+  end
+end
+
+function ConfigTest:RenderContent(parent)
+  local Schemas = ConfigTest.Schemas
+
+  -- Initialize State with Dummy DB (idempotent)
   local DummyDB = {
     enableMinimap = true,
     globalScale = 1.0,
@@ -419,48 +453,48 @@ function ConfigTest:RenderContent(parent)
   }
   AddOn.ConfigState:Initialize(DummyDB)
 
-  -- Layout Initialization
+  -- Layout Initialization (only once)
   local layout = parent.Layout
   if not layout then
     layout = AddOn.ConfigLayout:CreateTwoColumnLayout(parent)
     parent.Layout = layout
     layout:SetScale(1.0)
 
-    -- Populate Sidebar
+    -- Populate Sidebar using PERSISTENT schema references
     AddOn.ConfigLayout:AddSidebarButton(layout, "about", "About", function()
       AddOn.ConfigState:SetValue("lastSection", "about")
-      AddOn.ConfigRenderer:Render(AboutSchema, layout)
+      AddOn.ConfigRenderer:Render(Schemas.About, layout)
     end)
     AddOn.ConfigLayout:AddSidebarButton(layout, "general", "General Settings", function()
       AddOn.ConfigState:SetValue("lastSection", "general")
-      AddOn.ConfigRenderer:Render(GeneralSchema, layout)
+      AddOn.ConfigRenderer:Render(Schemas.General, layout)
     end)
     AddOn.ConfigLayout:AddSidebarButton(layout, "profiles", "Profiles", function()
       AddOn.ConfigState:SetValue("lastSection", "profiles")
-      AddOn.ConfigRenderer:Render(ProfilesSchema, layout)
+      AddOn.ConfigRenderer:Render(Schemas.Profiles, layout)
     end)
     AddOn.ConfigLayout:AddSidebarButton(layout, "buttons", "Experiments", function()
       AddOn.ConfigState:SetValue("lastSection", "buttons")
-      AddOn.ConfigRenderer:Render(ButtonsSchema, layout)
+      AddOn.ConfigRenderer:Render(Schemas.Buttons, layout)
     end)
     AddOn.ConfigLayout:AddSidebarButton(layout, "advanced", "Advanced", function()
       AddOn.ConfigState:SetValue("lastSection", "advanced")
-      AddOn.ConfigRenderer:Render(AdvancedSchema, layout)
+      AddOn.ConfigRenderer:Render(Schemas.Advanced, layout)
     end)
   end
 
   -- Initial Render (Restore last section)
   local lastSection = AddOn.ConfigState:GetValue("lastSection") or "about"
   local sectionSchemas = {
-    about = AboutSchema,
-    general = GeneralSchema,
-    profiles = ProfilesSchema,
-    advanced = AdvancedSchema,
-    buttons = ButtonsSchema
+    about = Schemas.About,
+    general = Schemas.General,
+    profiles = Schemas.Profiles,
+    advanced = Schemas.Advanced,
+    buttons = Schemas.Buttons
   }
 
   AddOn.ConfigLayout:SelectSidebarButton(layout, lastSection)
-  AddOn.ConfigRenderer:Render(sectionSchemas[lastSection] or AboutSchema, layout)
+  AddOn.ConfigRenderer:Render(sectionSchemas[lastSection] or Schemas.About, layout)
 end
 
 -- Initialize on Login
