@@ -1,15 +1,16 @@
 # NoobTaco-Config API Reference
 
-This document provides a quick overview of how to use the `NoobTaco-Config` library within your addon.
+This document provides a technical overview of how to use the `NoobTaco-Config` library.
 
 ## 1. Initialization
-The library uses your addon's private table (`AddOn`) to share its modules.
+The library should be initialized via `LibStub`.
 
 ```lua
-local Name, AddOn = ...
+local Lib = LibStub("NoobTaco-Config-1.0")
+if not Lib then return end
 
--- Initialize the state with your SavedVariables table
-AddOn.ConfigState:Initialize(MyAddon_SavedVars)
+-- Initialize state with your SavedVariables table
+Lib.State:Initialize(MyAddon_SavedVars)
 ```
 
 ## 2. Layout & Workflow
@@ -17,12 +18,12 @@ The library is designed for a two-column layout (Sidebar + Content).
 
 ```lua
 -- Create the main container (usually inside a Blizzard Settings canvas)
-local layout = AddOn.ConfigLayout:CreateTwoColumnLayout(parentFrame)
+local layout = Lib.Layout:CreateTwoColumnLayout(parentFrame)
 
 -- Add items to the sidebar
-AddOn.ConfigLayout:AddSidebarButton(layout, "general", "General Settings", function()
+Lib.Layout:AddSidebarButton(layout, "general", "General Settings", function()
     -- Render the schema when clicked
-    AddOn.ConfigRenderer:Render(MySchema, layout)
+    Lib.Renderer:Render(MySchema, layout)
 end)
 ```
 
@@ -38,8 +39,11 @@ Schemas are tables defining your UI components.
 | `slider` | `id`, `label`, `min`, `max`, `step`, `default` |
 | `dropdown` | `id`, `label`, `options` ({label, value}) |
 | `media` | `id`, `label`, `options` (sound paths) |
-| `button` | `label`, `onClick` |
+| `button` | `label`, `onClick`, `style`, `customColors` |
 | `callout` | `title`, `text`, `buttonText`, `style` ("warning", "error", "success", "info") |
+| `card` | `label`, `children` |
+| `about` | `icon`, `title`, `version`, `description`, `links` ({label, url}) |
+| `expandable` | `label`, `children` |
 
 ### Example Schema
 ```lua
@@ -56,11 +60,15 @@ local GeneralSchema = {
 ## 4. Themes
 ```lua
 -- Register a custom theme
-AddOn.ConfigTheme:RegisterTheme("MyCustomTheme", themeTable)
+Lib.Theme:RegisterTheme("MyCustomTheme", themeTable)
 
 -- Apply a theme
-AddOn.ConfigTheme:SetTheme("Nord") -- Default, Nord, Catppuccin
+Lib.Theme:SetTheme("NoobTaco") -- NoobTaco, Nord, Catppuccin
 ```
 
-## 5. Development Sync
-If using the symbolic link strategy, any changes you make in the `NoobTaco-Config` project will instantly reflect in `NoobTacoUI`.
+## 5. Media & Assets
+Use `Lib.Media` to get the base path for library assets. This ensures correct paths whether the library is standalone or embedded.
+
+```lua
+local fontPath = Lib.Media .. "\\Fonts\\Poppins-Regular.ttf"
+```

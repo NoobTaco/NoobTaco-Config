@@ -2,13 +2,19 @@
 
 ## [1.1.0] - 2026-01-09
 ### Added
+- **Dynamic Media Pathing**: Introduced `Lib.Media` to automatically detect and resolve asset paths (fonts, icons) whether the library is running standalone or embedded in another addon.
+- **New Widgets**:
+    - `card`: Bordered container for grouping related settings.
+    - `about`: Standardized branding section for addon info and links.
+    - `media`: Specialized dropdown with audio preview support.
+    - `expandable`: Collapsible sections for complex schemas.
+    - `callout`: Alert containers with `success`, `info`, `warning`, and `error` styles.
 - **NoobTaco Theme**: New default "NoobTaco" theme based on Digital Taco UI Kit Specs, featuring Charcoal Navy glassmorphism and Burnt Sienna highlights.
 - **Improved Theming**: Added support for 4th color channel (alpha) in theme presets.
 
-
 ### Changed
 - **Internal Refactor**: Consolidated theme update logic in `Renderer.lua` to remove redundant code and improve maintainability.
-- **Documentation**: Updated `README.md` to correctly reflect the project's internal file structure.
+- **Documentation**: Overhauled `README.md` and `API_REFERENCE.md` to reflect new architecture and embed patterns.
 - **Production Prep**: Disabled test files in `NoobTaco-Config.toc` to prevent them from loading in production environments.
 
 ### Fixed

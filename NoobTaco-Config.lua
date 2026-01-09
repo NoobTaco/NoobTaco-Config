@@ -15,6 +15,17 @@ Lib.Layout = Lib.Layout or {}
 Lib.Renderer = Lib.Renderer or {}
 Lib.Theme = Lib.Theme or {}
 
+-- Media Path Helper (Dynamic detection for Standalone vs Embedded)
+local addonName, _ = ...
+local mediaPath = "Interface\\AddOns\\NoobTaco-Config\\Media"
+
+-- If we are embedded (addonName will be NoobTacoUI or similar)
+if addonName and addonName ~= "NoobTaco-Config" then
+    mediaPath = "Interface\\AddOns\\" .. addonName .. "\\Libraries\\NoobTaco-Config\\Media"
+end
+
+Lib.Media = mediaPath
+
 -- Public API
 function Lib:Register(projectName, configSchema, dbTable)
     self.State:Initialize(dbTable)

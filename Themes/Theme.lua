@@ -11,8 +11,8 @@ local math, string = math, string
 local CreateFrame = CreateFrame
 
 Theme.Fonts = {
-  Normal = "Interface\\AddOns\\NoobTaco-Config\\Media\\Fonts\\Poppins-Regular.ttf",
-  Bold = "Interface\\AddOns\\NoobTaco-Config\\Media\\Fonts\\Poppins-SemiBold.ttf",
+  Normal = Lib.Media .. "\\Fonts\\Poppins-Regular.ttf",
+  Bold = Lib.Media .. "\\Fonts\\Poppins-SemiBold.ttf",
 }
 
 Theme.Presets = {
