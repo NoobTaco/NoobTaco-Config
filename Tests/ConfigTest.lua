@@ -42,13 +42,30 @@ function ConfigTest:RenderContent(parent)
       { type = "description", text = "Here you can configure the general options for NoobTacoUI. These settings affect the overall behavior of the addon." },
 
       { type = "header",      label = "Interface" },
-      { id = "enableMinimap", type = "checkbox",                                                                                                           label = "Show Minimap Icon",          default = true },
-      { id = "globalScale",   type = "slider",                                                                                                             label = "Global Scale",               min = 0.5,         max = 2.0, step = 0.1, default = 1.0 },
-      { id = "accentColor",   type = "colorpicker",                                                                                                        label = "Accent Color",               default = "00A8FF" },
+      { id = "enableMinimap", type = "checkbox",                                                                                                           label = "Show Minimap Icon", default = true },
+      { id = "globalScale",   type = "slider",                                                                                                             label = "Global Scale",      min = 0.5,         max = 2.0, step = 0.1, default = 1.0 },
+      { id = "accentColor",   type = "colorpicker",                                                                                                        label = "Accent Color",      default = "00A8FF" },
 
-      { type = "header",      label = "Notifications" },
-      { id = "enableToasts",  type = "checkbox",                                                                                                           label = "Enable Toast Notifications", default = true },
-      { id = "soundEnabled",  type = "checkbox",                                                                                                           label = "Play Sounds",                default = false },
+      { type = "header",      label = "Theme" },
+      {
+        id = "activeTheme",
+        type = "dropdown",
+        label = "UI Theme",
+        default = "NoobTaco",
+        options = {
+          { label = "NoobTaco",   value = "NoobTaco" },
+          { label = "Default",    value = "Default" },
+          { label = "Nord",       value = "Nord" },
+          { label = "Catppuccin", value = "Catppuccin" },
+        },
+        onChange = function(value)
+          AddOn.ConfigTheme:SetTheme(value)
+        end
+      },
+
+      { type = "header",     label = "Notifications" },
+      { id = "enableToasts", type = "checkbox",      label = "Enable Toast Notifications", default = true },
+      { id = "soundEnabled", type = "checkbox",      label = "Play Sounds",                default = false },
     }
   }
 
@@ -394,6 +411,7 @@ function ConfigTest:RenderContent(parent)
     enableMinimap = true,
     globalScale = 1.0,
     accentColor = "00A8FF",
+    activeTheme = "NoobTaco",
     enableToasts = true,
     apiKey = "SECRET_KEY",
     debugLevel = "WARN",
