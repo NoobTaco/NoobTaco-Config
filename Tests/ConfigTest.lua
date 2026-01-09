@@ -423,7 +423,10 @@ function ConfigTest:Initialize()
 
     canvas:SetScript("OnShow", function()
       if not hasRenderedOnce then
-        -- Defer the FIRST render slightly to let WoW complete its layout pass
+        -- Double-pass rendering to ensure WoW layout engine has calculated dimensions
+        -- First pass: creates frames and triggers layout
+        TryRender()
+        -- Second pass after WoW has done a layout tick: uses correct dimensions
         C_Timer.After(0, function()
           TryRender()
           hasRenderedOnce = true
