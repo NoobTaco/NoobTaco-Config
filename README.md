@@ -22,6 +22,8 @@ This library provides a way to generate WoW Interface Options panels dynamically
 - **ConfigRenderer.lua**: The core engine that parses the schema and instantiates UI widgets (Checkboxes, Sliders, Buttons).
 - **Load.xml**: XML loader to include the library in the TOC.
 
+> **Note**: These files are located in the `Internal/` directory in the source, but are exposed globally via `AddOn`.
+
 ## Usage
 
 ### 1. Define Valid Options

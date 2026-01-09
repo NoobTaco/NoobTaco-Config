@@ -5,6 +5,12 @@
 - **NoobTaco Theme**: New default "NoobTaco" theme based on Digital Taco UI Kit Specs, featuring Charcoal Navy glassmorphism and Burnt Sienna highlights.
 - **Improved Theming**: Added support for 4th color channel (alpha) in theme presets.
 
+
+### Changed
+- **Internal Refactor**: Consolidated theme update logic in `Renderer.lua` to remove redundant code and improve maintainability.
+- **Documentation**: Updated `README.md` to correctly reflect the project's internal file structure.
+- **Production Prep**: Disabled test files in `NoobTaco-Config.toc` to prevent them from loading in production environments.
+
 ### Fixed
 - **Rendering Instability**: Added fallbacks for initial zero-width/height states on fresh load to prevent component clumping.
 - **Scrollbar Visibility**: Fixed an issue where the scrollbar was invisible or improperly colored on initial load.

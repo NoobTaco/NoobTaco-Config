@@ -30,4 +30,4 @@ Internal/Renderer.lua
 NoobTaco-Config.lua
 
 # Testing
-Tests/ConfigTest.lua
+# Tests/ConfigTest.lua

@@ -157,16 +157,8 @@ local function GetFrame(frameType, parent)
       frame.Content:SetPoint("TOPLEFT", frame.Header, "BOTTOMLEFT", 9, -10)
       frame.Content:SetPoint("BOTTOMRIGHT", -10, 10)
 
-      -- Theme Update for Card
-      frame.UpdateTheme = function(self)
-        Theme:ApplyFont(self.Title, "Bold", 13)
-        local r, g, b = Theme:GetColor("button_normal")
-        self.HeaderBg:SetColorTexture(r, g, b, 1)
-        local br, b_g, bb = Theme:GetColor("border")
-        self:SetBackdropBorderColor(br, b_g, bb, 1)
-        self:SetBackdropColor(0.1, 0.1, 0.12, 0.8)
-      end
-      Theme:RegisterT(frame)
+      -- Theme Update for Card: MOVED to shared block below
+      -- Theme:RegisterT(frame)
     elseif frameType == "editbox" then
       frame = CreateFrame("EditBox", nil, parent, "BackdropTemplate")
       frame:SetAutoFocus(false)
@@ -374,22 +366,8 @@ local function GetFrame(frameType, parent)
         b.Text:SetTextColor(0, 0, 0, 1)
       end
 
-      frame.UpdateTheme = function(self)
-        Theme:ApplyFont(self.Title, "Bold", 14)
-        Theme:ApplyFont(self.Text, "Normal", 12)
-
-        -- Apply colors based on severity
-        local severity = self.severity or "info"
-        local r, g, b = Theme:GetAlertColor(severity)
-
-        self:SetBackdropBorderColor(r, g, b, 1)
-        self.Title:SetTextColor(r, g, b)
-
-        -- Button
-        self.Button.customColors = Theme:GetButtonColorsForAlert(severity)
-        Theme:UpdateButtonState(self.Button)
-      end
-      Theme:RegisterT(frame)
+      -- Theme Update for Callout: MOVED to shared block below
+      -- Theme:RegisterT(frame)
     elseif frameType == "about" then
       frame = CreateFrame("Frame", nil, parent, "BackdropTemplate")
       frame:SetBackdrop({
@@ -431,18 +409,50 @@ local function GetFrame(frameType, parent)
       frame.Links = CreateFrame("Frame", nil, frame)
       frame.Links:SetPoint("TOPLEFT", frame.Icon, "BOTTOMLEFT", 0, -15)
       frame.Links:SetSize(1, 30)
-      frame.UpdateTheme = function(self)
-        Theme:ApplyFont(self.Title, "Bold", 24)
-        Theme:ApplyFont(self.Version, "Normal", 12)
-        Theme:ApplyFont(self.Description, "Normal", 12)
-        self.Title:SetTextColor(Theme:GetColor("header"))
-      end
+      -- Theme Update for About: MOVED to shared block below
     else
       frame = CreateFrame("Frame", nil, parent)
     end
 
     -- moved registration here to happen only once per frame lifetime
     if frame.UpdateTheme then
+      -- If widget already defined UpdateTheme (e.g. from a previous pass or weird structure), register it.
+      -- BUT we are consolidating them below, so this check is primarily for legacy/safety.
+      Theme:RegisterT(frame)
+    elseif frameType == "card" then
+      frame.UpdateTheme = function(self)
+        Theme:ApplyFont(self.Title, "Bold", 13)
+        local r, g, b = Theme:GetColor("button_normal")
+        self.HeaderBg:SetColorTexture(r, g, b, 1)
+        local br, b_g, bb = Theme:GetColor("border")
+        self:SetBackdropBorderColor(br, b_g, bb, 1)
+        self:SetBackdropColor(0.1, 0.1, 0.12, 0.8)
+      end
+      Theme:RegisterT(frame)
+    elseif frameType == "callout" then
+      frame.UpdateTheme = function(self)
+        Theme:ApplyFont(self.Title, "Bold", 14)
+        Theme:ApplyFont(self.Text, "Normal", 12)
+
+        -- Apply colors based on severity
+        local severity = self.severity or "info"
+        local r, g, b = Theme:GetAlertColor(severity)
+
+        self:SetBackdropBorderColor(r, g, b, 1)
+        self.Title:SetTextColor(r, g, b)
+
+        -- Button
+        self.Button.customColors = Theme:GetButtonColorsForAlert(severity)
+        Theme:UpdateButtonState(self.Button)
+      end
+      Theme:RegisterT(frame)
+    elseif frameType == "about" then
+      frame.UpdateTheme = function(self)
+        Theme:ApplyFont(self.Title, "Bold", 24)
+        Theme:ApplyFont(self.Version, "Normal", 12)
+        Theme:ApplyFont(self.Description, "Normal", 12)
+        self.Title:SetTextColor(Theme:GetColor("header"))
+      end
       Theme:RegisterT(frame)
     elseif frameType == "alert" then
       frame.UpdateTheme = function(self)
