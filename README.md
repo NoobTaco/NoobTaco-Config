@@ -10,7 +10,7 @@ This library provides a way to generate WoW Interface Options panels dynamically
 - **Declarative Schema**: Define UI elements in a simple table structure.
 - **Two-Column Layout**: Automatic sidebar navigation and content area.
 - **State Management**: Transactional state with commit/revert capabilities.
-- **Theming**: Built-in support for switching color themes (Default, Nord, Catppuccin) and fonts (Poppins).
+- **Theming**: Built-in support for switching color themes (NoobTaco, Nord, Catppuccin) and fonts (Poppins).
 - **Custom Rendering**: "Pixel-perfect" rendering for all interactive components (EditBox, Dropdown, Slider, Media) with a consistent 1px border aesthetic.
 
 ## File Structure

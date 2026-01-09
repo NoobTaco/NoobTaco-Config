@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.1.0] - 2026-01-09
+### Added
+- **NoobTaco Theme**: New default "NoobTaco" theme based on Digital Taco UI Kit Specs, featuring Charcoal Navy glassmorphism and Burnt Sienna highlights.
+- **Improved Theming**: Added support for 4th color channel (alpha) in theme presets.
+
 ## [1.0.0] - 2026-01-08
 ### Added
 - **Theme Registration**: Developers can now register custom themes using `AddOn.ConfigTheme:RegisterTheme`.

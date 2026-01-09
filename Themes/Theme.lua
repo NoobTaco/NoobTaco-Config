@@ -2,7 +2,7 @@ local _, AddOn = ...
 local Theme = {}
 AddOn.ConfigTheme = Theme
 
-Theme.Current = "Default"
+Theme.Current = "NoobTaco"
 
 -- Lua Globals
 local setmetatable, unpack, pairs = setmetatable, unpack, pairs
@@ -72,6 +72,25 @@ Theme.Presets = {
       error = { 0.96, 0.48, 0.52, 1 },   -- Red
       success = { 0.65, 0.82, 0.55, 1 }, -- Green
       info = { 0.53, 0.75, 1, 1 },       -- Sapphire
+    }
+  },
+  NoobTaco = {
+    background = { 0.11, 0.15, 0.23, 0.60 }, -- Charcoal Navy (rgba 27, 38, 59, 0.6)
+    header = { 0.84, 0.51, 0.27, 1.00 },     -- Burnt Sienna (#D78144)
+    border = { 0.84, 0.51, 0.27, 0.30 },     -- Burnt Sienna tint (rgba 215, 129, 68, 0.3)
+    text = { 0.97, 0.98, 0.98, 1.00 },       -- Cloud White (#F8F9FA)
+    highlight = { 0.84, 0.51, 0.27, 1.00 },  -- Burnt Sienna
+    button = {
+      normal = { 0.14, 0.19, 0.29, 1.00 },
+      hover = { 0.20, 0.27, 0.41, 1.00 },
+      selected = { 0.84, 0.51, 0.27, 1.00 },
+      text = { 0.97, 0.98, 0.98, 1.00 },
+    },
+    alert = {
+      warning = { 0.96, 0.64, 0.38, 1.00 }, -- Specular Highlight color
+      error = { 0.80, 0.30, 0.25, 1.00 },
+      success = { 0.40, 0.70, 0.50, 1.00 },
+      info = { 0.35, 0.55, 0.85, 1.00 },
     }
   }
 }
