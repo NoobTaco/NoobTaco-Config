@@ -1,9 +1,8 @@
 local _, AddOn = ...
 
 -- Lua Globals
-local _G = _G
-local type, tostring, tonumber, select, unpack = type, tostring, tonumber, select, unpack
-local pairs, ipairs, next = pairs, ipairs, next
+local tostring, tonumber, select = tostring, tonumber, select
+local ipairs = ipairs
 local math, table, string = math, table, string
 
 -- Blizzard Globals
@@ -11,7 +10,6 @@ local CreateFrame = CreateFrame
 local PlaySoundFile = PlaySoundFile
 local GetBuildInfo = GetBuildInfo
 local GameTooltip = GameTooltip
-local wipe = wipe
 
 local ConfigRenderer = {}
 AddOn.ConfigRenderer = ConfigRenderer
@@ -22,9 +20,9 @@ local PixelUtil = AddOn.PixelUtil or PixelUtil
 
 -- Simple Object Pool
 local FramePool = {}
-local function GetFrame(type, parent)
-  if not FramePool[type] then FramePool[type] = {} end
-  local pool = FramePool[type]
+local function GetFrame(frameType, parent)
+  if not FramePool[frameType] then FramePool[frameType] = {} end
+  local pool = FramePool[frameType]
   local frame = table.remove(pool)
 
   if not frame then

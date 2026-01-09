@@ -58,9 +58,9 @@ function Schema:Validate(definition)
   return true
 end
 
-function Schema:NewNode(type, id, label)
+function Schema:NewNode(itemType, id, label)
   return {
-    type = type,
+    type = itemType,
     id = id,
     label = label
   }
