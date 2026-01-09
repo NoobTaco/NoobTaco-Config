@@ -39,6 +39,9 @@ local function ResetFrame(frame, frameType)
   if frame.Low then frame.Low:SetText("") end
   if frame.High then frame.High:SetText("") end
   if frame.Value then frame.Value:SetText("") end
+  -- About frame specific
+  if frame.Version then frame.Version:SetText("") end
+  if frame.Description then frame.Description:SetText("") end
 
   -- Clear custom properties
   frame.style = nil
@@ -46,8 +49,7 @@ local function ResetFrame(frame, frameType)
   frame.severity = nil
   frame.expanded = nil
 
-  -- Reset visibility
-  frame:Show()
+  -- NOTE: Don't Show() here - visibility is handled later in GetFrame after SetParent
 end
 
 local function GetFrame(frameType, parent)
@@ -97,6 +99,8 @@ local function GetFrame(frameType, parent)
       frame.Value:SetPoint("BOTTOMRIGHT", frame, "TOPRIGHT", 0, 5)
     elseif frameType == "button" then
       frame = Theme:CreateThemedButton(parent)
+      -- NOTE: Hover handlers are set in CreateThemedButton() but cleared by ResetFrame()
+      -- They will be re-applied below after pool retrieval
     elseif frameType == "alert" then
       frame = CreateFrame("Frame", nil, parent)
       frame.text = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
@@ -529,9 +533,94 @@ local function GetFrame(frameType, parent)
     ResetFrame(frame, frameType)
   end
 
+  -- Re-apply hover handlers for buttons retrieved from pool
+  -- (CreateThemedButton sets these, but ResetFrame clears them)
+  if frameType == "button" then
+    frame:SetScript("OnEnter", function(b)
+      b.isHover = true
+      Theme:UpdateButtonState(b)
+    end)
+    frame:SetScript("OnLeave", function(b)
+      b.isHover = false
+      Theme:UpdateButtonState(b)
+    end)
+  end
+
+  -- Ensure about frame child elements are visible after pool retrieval
+  if frameType == "about" then
+    if frame.Title then frame.Title:Show() end
+    if frame.Version then frame.Version:Show() end
+    if frame.Description then frame.Description:Show() end
+    if frame.Icon then frame.Icon:Show() end
+    if frame.Links then frame.Links:Show() end
+  end
+
+  -- Ensure header child elements are visible and positioned
+  if frameType == "header" then
+    if frame.text then
+      frame.text:ClearAllPoints()
+      frame.text:SetPoint("TOPLEFT", 0, 0)
+      frame.text:Show()
+    end
+    if frame.line then
+      frame.line:ClearAllPoints()
+      frame.line:SetPoint("TOPLEFT", frame.text, "BOTTOMLEFT", 0, -5)
+      frame.line:SetPoint("RIGHT", frame, "RIGHT", 0, 0)
+      frame.line:Show()
+    end
+  end
+
+  -- Ensure description text is visible and positioned
+  if frameType == "description" then
+    if frame.text then
+      frame.text:ClearAllPoints()
+      frame.text:SetAllPoints()
+      frame.text:SetJustifyH("LEFT")
+      frame.text:SetJustifyV("TOP")
+      frame.text:Show()
+    end
+  end
+
+  -- Ensure alert child elements are visible
+  if frameType == "alert" then
+    if frame.text then frame.text:Show() end
+    if frame.bg then frame.bg:Show() end
+  end
+
+  -- Ensure card child elements are visible
+  if frameType == "card" then
+    if frame.Header then frame.Header:Show() end
+    if frame.HeaderBg then frame.HeaderBg:Show() end
+    if frame.Title then frame.Title:Show() end
+    if frame.Content then frame.Content:Show() end
+  end
+
+  -- Ensure callout child elements are visible
+  if frameType == "callout" then
+    if frame.Title then frame.Title:Show() end
+    if frame.Text then frame.Text:Show() end
+    if frame.Button then frame.Button:Show() end
+  end
+
+  -- Ensure slider child elements are visible
+  if frameType == "slider" then
+    if frame.Text then frame.Text:Show() end
+    if frame.Low then frame.Low:Show() end
+    if frame.High then frame.High:Show() end
+    if frame.Value then frame.Value:Show() end
+    if frame.Thumb then frame.Thumb:Show() end
+  end
+
   frame.type = frameType
   frame:SetParent(parent)
   frame:Show()
+
+  -- CRITICAL: Force theme update for pooled frames to re-apply fonts and colors
+  -- UpdateTheme is only called once during frame creation, not on pool retrieval
+  if frame.UpdateTheme then
+    frame:UpdateTheme()
+  end
+
   return frame
 end
 
@@ -551,7 +640,11 @@ function ConfigRenderer:ReleaseChildren(parent)
     pcall(function() child:SetScript("OnEditFocusLost", nil) end)
     pcall(function() child:SetScript("OnTextChanged", nil) end)
 
+    -- Don't Hide() - just clear points. Frame becomes invisible when unanchored.
+    -- Hiding can cause persistent visibility issues with pooled frames.
+    -- UPDATE: We MUST Hide() and SetParent(nil) to prevent ghosting and pool duplication.
     child:Hide()
+    child:SetParent(nil)
     child:ClearAllPoints()
     if child.type and FramePool[child.type] then
       table.insert(FramePool[child.type], child)
@@ -575,6 +668,12 @@ function ConfigRenderer:Render(schema, container)
   self:Clear(container)
 
   local content = container.ContentChild
+
+  -- Force WoW layout engine to calculate dimensions before we measure
+  -- GetRect() triggers layout calculation for the frame hierarchy
+  container:GetRect()
+  if container.Content then container.Content:GetRect() end
+
   local width = container.Content:GetWidth()
   -- Handle initial zero-width or small-width case
   if width < 200 then

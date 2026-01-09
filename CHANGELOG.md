@@ -11,6 +11,7 @@
 - **Conflicting Anchors**: Resolved an issue in the About component where overlapping anchors pushed content off-screen.
 - **Memory Optimization**: Reimplemented About page link management to reuse buttons instead of creating new ones on every render.
 - **Header "Cycling"**: Fixed a bug where headers would flicker or disappear when interacting with sidebar buttons.
+- **Frame Ghosting**: Fixed a critical issue where frames were not properly detached from their parents when returned to the pool, preventing rendering glitches and disappearing elements.
 
 ## [1.0.0] - 2026-01-08
 ### Added
