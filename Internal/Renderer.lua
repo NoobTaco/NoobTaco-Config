@@ -27,10 +27,10 @@ local function GetFrame(frameType, parent)
 
   if not frame then
     -- Create new frame based on type
-    if type == "checkbox" then
+    if frameType == "checkbox" then
       frame = CreateFrame("CheckButton", nil, parent, "ChatConfigCheckButtonTemplate")
       if frame.Text then Theme:ApplyFont(frame.Text, "Normal", 12) end
-    elseif type == "slider" then
+    elseif frameType == "slider" then
       frame = CreateFrame("Slider", nil, parent, "BackdropTemplate")
       frame:SetOrientation("HORIZONTAL")
       frame:SetHeight(14) -- Thinner bar
@@ -65,23 +65,23 @@ local function GetFrame(frameType, parent)
       frame.Value = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
       Theme:ApplyFont(frame.Value, "Normal", 12)
       frame.Value:SetPoint("BOTTOMRIGHT", frame, "TOPRIGHT", 0, 5)
-    elseif type == "button" then
+    elseif frameType == "button" then
       frame = Theme:CreateThemedButton(parent)
-    elseif type == "alert" then
+    elseif frameType == "alert" then
       frame = CreateFrame("Frame", nil, parent)
       frame.text = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
       Theme:ApplyFont(frame.text, "Normal", 12)
       frame.text:SetAllPoints()
       frame.bg = frame:CreateTexture(nil, "BACKGROUND")
       frame.bg:SetAllPoints()
-    elseif type == "description" then
+    elseif frameType == "description" then
       frame = CreateFrame("Frame", nil, parent)
       frame.text = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
       Theme:ApplyFont(frame.text, "Normal", 12)
       frame.text:SetAllPoints()
       frame.text:SetJustifyH("LEFT")
       frame.text:SetJustifyV("TOP")
-    elseif type == "header" then
+    elseif frameType == "header" then
       frame = CreateFrame("Frame", nil, parent)
       frame.text = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
       Theme:ApplyFont(frame.text, "Bold", 14)
@@ -91,7 +91,7 @@ local function GetFrame(frameType, parent)
       frame.line:SetColorTexture(1, 1, 1, 0.2)
       frame.line:SetPoint("TOPLEFT", frame.text, "BOTTOMLEFT", 0, -5)
       frame.line:SetPoint("RIGHT", frame, "RIGHT", 0, 0)
-    elseif type == "editbox" then
+    elseif frameType == "editbox" then
       frame = CreateFrame("EditBox", nil, parent, "BackdropTemplate")
       frame:SetAutoFocus(false)
       frame:SetTextInsets(8, 8, 0, 0)
@@ -109,7 +109,7 @@ local function GetFrame(frameType, parent)
       -- EditBox is a FontInstance, apply directly
       Theme:ApplyFont(frame, "Normal", 12)
       frame.Label:SetPoint("BOTTOMLEFT", frame, "TOPLEFT", 0, 5)
-    elseif type == "dropdown" then
+    elseif frameType == "dropdown" then
       frame = CreateFrame("Button", nil, parent, "BackdropTemplate")
       -- Custom Dropdown-like appearance matching 'media'
       frame:SetBackdrop({
@@ -161,7 +161,7 @@ local function GetFrame(frameType, parent)
       frame.Popup.Content = CreateFrame("Frame", nil, frame.Popup.ScrollFrame)
       frame.Popup.Content:SetSize(1, 1)
       frame.Popup.ScrollFrame:SetScrollChild(frame.Popup.Content)
-    elseif type == "colorpicker" then
+    elseif frameType == "colorpicker" then
       frame = CreateFrame("Button", nil, parent)
       frame:SetSize(20, 20)
       frame.swatch = frame:CreateTexture(nil, "OVERLAY")
@@ -177,7 +177,7 @@ local function GetFrame(frameType, parent)
       frame.border:SetPoint("BOTTOMRIGHT", 1, -1)
       frame.border:SetColorTexture(0.5, 0.5, 0.5)
       frame.border:SetColorTexture(0.5, 0.5, 0.5)
-    elseif type == "media" then
+    elseif frameType == "media" then
       frame = CreateFrame("Button", nil, parent, "BackdropTemplate")
       -- Basic Dropdown-like appearance
       frame:SetBackdrop({
@@ -230,7 +230,7 @@ local function GetFrame(frameType, parent)
       frame.Popup.Content = CreateFrame("Frame", nil, frame.Popup.ScrollFrame)
       frame.Popup.Content:SetSize(1, 1)
       frame.Popup.ScrollFrame:SetScrollChild(frame.Popup.Content)
-    elseif type == "dropdown_item" then
+    elseif frameType == "dropdown_item" then
       frame = CreateFrame("Button", nil, parent)
       local hl = frame:CreateTexture(nil, "HIGHLIGHT")
       hl:SetAllPoints()
@@ -239,7 +239,7 @@ local function GetFrame(frameType, parent)
       frame.Text = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
       Theme:ApplyFont(frame.Text, "Normal", 12)
       frame.Text:SetPoint("LEFT", 5, 0)
-    elseif type == "media_item" then
+    elseif frameType == "media_item" then
       frame = CreateFrame("Button", nil, parent)
       local hl = frame:CreateTexture(nil, "HIGHLIGHT")
       hl:SetAllPoints()
@@ -257,7 +257,7 @@ local function GetFrame(frameType, parent)
       local icon = playBtn:CreateTexture(nil, "ARTWORK")
       icon:SetAllPoints()
       playBtn.Icon = icon
-    elseif type == "callout" then
+    elseif frameType == "callout" then
       frame = CreateFrame("Frame", nil, parent, "BackdropTemplate")
       frame:SetBackdrop({
         bgFile = "Interface/Tooltips/UI-Tooltip-Background",
@@ -314,7 +314,7 @@ local function GetFrame(frameType, parent)
         Theme:UpdateButtonState(self.Button)
       end
       Theme:RegisterT(frame)
-    elseif type == "expandable" then
+    elseif frameType == "expandable" then
       frame = CreateFrame("Button", nil, parent, "BackdropTemplate")
       frame:SetBackdrop({
         bgFile = "Interface/Buttons/WHITE8X8",
@@ -352,7 +352,7 @@ local function GetFrame(frameType, parent)
         Theme:ApplyFont(self.Title, "Bold", 13)
         Theme:ApplyFont(self.Status, "Bold", 10)
       end
-    elseif type == "about" then
+    elseif frameType == "about" then
       frame = CreateFrame("Frame", nil, parent, "BackdropTemplate")
       frame:SetBackdrop({
         bgFile = "Interface/Buttons/WHITE8X8",
@@ -407,7 +407,7 @@ local function GetFrame(frameType, parent)
 
   -- Initial Registration / UpdateTheme definition for other types
   if not frame.UpdateTheme then
-    if type == "alert" then
+    if frameType == "alert" then
       frame.UpdateTheme = function(self)
         local severity = self.severity or "info"
         local r, g, b = Theme:GetAlertColor(severity)
@@ -415,24 +415,24 @@ local function GetFrame(frameType, parent)
         self.text:SetTextColor(r, g, b, 1)
         Theme:ApplyFont(self.text, "Normal", 12)
       end
-    elseif type == "header" then
+    elseif frameType == "header" then
       frame.UpdateTheme = function(self)
         Theme:ApplyFont(self.text, "Bold", 14)
         self.text:SetTextColor(Theme:GetColor("header"))
       end
-    elseif type == "description" then
+    elseif frameType == "description" then
       frame.UpdateTheme = function(self)
         Theme:ApplyFont(self.text, "Normal", 12)
         self.text:SetTextColor(Theme:GetColor("text"))
       end
-    elseif type == "checkbox" then
+    elseif frameType == "checkbox" then
       frame.UpdateTheme = function(self)
         if self.Text then
           Theme:ApplyFont(self.Text, "Normal", 12)
           self.Text:SetTextColor(Theme:GetColor("text"))
         end
       end
-    elseif type == "editbox" then
+    elseif frameType == "editbox" then
       frame.UpdateTheme = function(self)
         Theme:ApplyFont(self.Label, "Normal", 12)
         self.Label:SetTextColor(Theme:GetColor("text"))
@@ -441,7 +441,7 @@ local function GetFrame(frameType, parent)
         local r, g, b = Theme:GetColor("border")
         self:SetBackdropBorderColor(r, g, b, 1)
       end
-    elseif type == "dropdown" then
+    elseif frameType == "dropdown" then
       frame.UpdateTheme = function(self)
         Theme:ApplyFont(self.Label, "Normal", 12)
         self.Label:SetTextColor(Theme:GetColor("text"))
@@ -450,7 +450,7 @@ local function GetFrame(frameType, parent)
         local r, g, b = Theme:GetColor("border")
         self:SetBackdropBorderColor(r, g, b, 1)
       end
-    elseif type == "slider" then
+    elseif frameType == "slider" then
       frame.UpdateTheme = function(self)
         if self.Text then
           Theme:ApplyFont(self.Text, "Normal", 12)
@@ -475,7 +475,7 @@ local function GetFrame(frameType, parent)
         local hr, hg, hb = Theme:GetColor("highlight")
         if self.Thumb then self.Thumb:SetColorTexture(hr, hg, hb, 1) end
       end
-    elseif type == "media" then
+    elseif frameType == "media" then
       frame.UpdateTheme = function(self)
         Theme:ApplyFont(self.Label, "Normal", 12)
         self.Label:SetTextColor(Theme:GetColor("text"))
@@ -489,7 +489,7 @@ local function GetFrame(frameType, parent)
     Theme:RegisterT(frame)
   end
 
-  frame.type = type
+  frame.type = frameType
   frame:SetParent(parent)
   frame:Show()
   return frame
@@ -570,9 +570,26 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
     elseif item.type == "description" then
       frame.text:SetText(item.label)
     elseif item.type == "button" then
-      frame.Text:SetText(item.label)
-      if item.customColors then
-        frame.customColors = item.customColors
+      -- frame.Text:SetText(item.label) -- Handled later after sizing
+
+      -- Handle styling
+      local styleColors = nil
+      if item.style then
+        styleColors = Theme:GetButtonColorsForStyle(item.style)
+      end
+
+      if styleColors or item.customColors then
+        -- Merge custom colors over style colors if both exist
+        local finalColors = styleColors or {}
+        if item.customColors then
+          for k, v in pairs(item.customColors) do
+            finalColors[k] = v
+          end
+        end
+        frame.customColors = finalColors
+        Theme:UpdateButtonState(frame)
+      else
+        frame.customColors = nil
         Theme:UpdateButtonState(frame)
       end
     end
@@ -1000,6 +1017,15 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
       PixelUtil.SetSize(frame, w, h)
     else
       frame:SetSize(w, h)
+    end
+  end
+
+  -- Apply Link/Label Text for buttons specifically AFTER size is set
+  if item.type == "button" and item.label then
+    if frame.SetLabel then
+      frame:SetLabel(item.label)
+    else
+      frame.Text:SetText(item.label)
     end
   end
 

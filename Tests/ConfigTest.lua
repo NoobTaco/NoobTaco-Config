@@ -207,7 +207,7 @@ function ConfigTest:RenderContent(parent)
         type = "expandable",
         label = "Cooldown Manager Tweaks",
         status = "NOT LOADED",
-        expanded = true,
+        expanded = false,
         children = {
           {
             type = "description",
@@ -225,25 +225,14 @@ function ConfigTest:RenderContent(parent)
               {
                 type = "button",
                 label = "Copy Profile String",
-                width = 200,
-                customColors = {
-                  normal = { 0.3, 0.6, 0.7, 1 }, -- Lighter Blue/Teal
-                  hover = { 0.4, 0.7, 0.8, 1 },
-                  selected = { 0.2, 0.5, 0.6, 1 },
-                  text = { 1, 1, 1, 1 }
-                },
+                style = "primary",
+                width = 150,
                 onClick = function() print("Copied CMT Profile") end
               },
               {
                 type = "button",
                 label = "Get Addon Link",
-                width = 200,
-                customColors = {
-                  normal = { 0.3, 0.3, 0.35, 1 }, -- Lighter Grey/Blue
-                  hover = { 0.4, 0.4, 0.45, 1 },
-                  selected = { 0.2, 0.2, 0.25, 1 },
-                  text = { 1, 1, 1, 1 }
-                },
+                width = 150,
                 onClick = function() print("Link: https://curseforge.com/...") end
               }
             }
@@ -263,6 +252,140 @@ function ConfigTest:RenderContent(parent)
         expanded = false,
         children = {}
       }
+    }
+  }
+
+  local ButtonsSchema = {
+    type = "group",
+    children = {
+      { type = "header",      label = "Button Style Variations" },
+      { type = "description", text = "This section showcases the different button styles available in the NoobTaco-Config library." },
+
+      { type = "header",      label = "Functional Styles" },
+      {
+        type = "row",
+        children = {
+          {
+            type = "button",
+            label = "Primary Button",
+            style = "primary",
+            width = 150,
+            onClick = function()
+              print(
+                "Primary Clicked")
+            end
+          },
+          {
+            type = "button",
+            label = "Secondary Button",
+            style = "secondary",
+            width = 150,
+            onClick = function()
+              print(
+                "Secondary Clicked")
+            end
+          },
+        }
+      },
+
+      { type = "header", label = "Semantic Alert Styles" },
+      {
+        type = "row",
+        children = {
+          {
+            type = "button",
+            label = "Success Button",
+            style = "success",
+            width = 150,
+            onClick = function()
+              print(
+                "Success Clicked")
+            end
+          },
+          {
+            type = "button",
+            label = "Info Button",
+            style = "info",
+            width = 150,
+            onClick = function()
+              print(
+                "Info Clicked")
+            end
+          },
+        }
+      },
+      {
+        type = "row",
+        children = {
+          {
+            type = "button",
+            label = "Warning Button",
+            style = "warning",
+            width = 150,
+            onClick = function()
+              print(
+                "Warning Clicked")
+            end
+          },
+          {
+            type = "button",
+            label = "Error Button",
+            style = "error",
+            width = 150,
+            onClick = function()
+              print(
+                "Error Clicked")
+            end
+          },
+        }
+      },
+
+      { type = "header", label = "Custom Overrides" },
+      {
+        type = "row",
+        children = {
+          {
+            type = "button",
+            label = "Style + Custom Text",
+            style = "primary",
+            width = 180,
+            customColors = { text = { 1, 0, 0, 1 } }, -- Red text on Gold button
+            onClick = function() print("Custom Text Clicked") end
+          },
+          {
+            type = "button",
+            label = "Fully Custom",
+            width = 180,
+            customColors = {
+              normal = { 0.5, 0, 0.5, 1 },
+              hover = { 0.7, 0, 0.7, 1 },
+              text = { 1, 1, 1, 1 }
+            },
+            onClick = function() print("Fully Custom Clicked") end
+          },
+        }
+      },
+
+      { type = "header", label = "Truncation Test" },
+      {
+        type = "row",
+        children = {
+          {
+            type = "button",
+            label = "This is a very long button label that should definitely truncate",
+            style = "primary",
+            width = 200,
+            onClick = function() print("Long button clicked") end
+          },
+          {
+            type = "button",
+            label = "Another long label for a small button",
+            style = "secondary",
+            width = 100,
+            onClick = function() print("Small long button clicked") end
+          },
+        }
+      },
     }
   }
 
@@ -286,22 +409,40 @@ function ConfigTest:RenderContent(parent)
     layout:SetScale(1.0)
 
     -- Populate Sidebar
+    AddOn.ConfigLayout:AddSidebarButton(layout, "about", "About", function()
+      AddOn.ConfigState:SetValue("lastSection", "about")
+      AddOn.ConfigRenderer:Render(AboutSchema, layout)
+    end)
     AddOn.ConfigLayout:AddSidebarButton(layout, "general", "General Settings", function()
+      AddOn.ConfigState:SetValue("lastSection", "general")
       AddOn.ConfigRenderer:Render(GeneralSchema, layout)
     end)
     AddOn.ConfigLayout:AddSidebarButton(layout, "profiles", "Profiles", function()
+      AddOn.ConfigState:SetValue("lastSection", "profiles")
       AddOn.ConfigRenderer:Render(ProfilesSchema, layout)
     end)
-    AddOn.ConfigLayout:AddSidebarButton(layout, "advanced", "Advanced", function()
-      AddOn.ConfigRenderer:Render(AdvancedSchema, layout)
+    AddOn.ConfigLayout:AddSidebarButton(layout, "buttons", "Experiments", function()
+      AddOn.ConfigState:SetValue("lastSection", "buttons")
+      AddOn.ConfigRenderer:Render(ButtonsSchema, layout)
     end)
-    AddOn.ConfigLayout:AddSidebarButton(layout, "about", "About", function()
-      AddOn.ConfigRenderer:Render(AboutSchema, layout)
+    AddOn.ConfigLayout:AddSidebarButton(layout, "advanced", "Advanced", function()
+      AddOn.ConfigState:SetValue("lastSection", "advanced")
+      AddOn.ConfigRenderer:Render(AdvancedSchema, layout)
     end)
   end
 
-  -- Initial Render
-  AddOn.ConfigRenderer:Render(GeneralSchema, layout)
+  -- Initial Render (Restore last section)
+  local lastSection = AddOn.ConfigState:GetValue("lastSection") or "about"
+  local sectionSchemas = {
+    about = AboutSchema,
+    general = GeneralSchema,
+    profiles = ProfilesSchema,
+    advanced = AdvancedSchema,
+    buttons = ButtonsSchema
+  }
+
+  AddOn.ConfigLayout:SelectSidebarButton(layout, lastSection)
+  AddOn.ConfigRenderer:Render(sectionSchemas[lastSection] or AboutSchema, layout)
 end
 
 -- Initialize on Login

@@ -17,17 +17,17 @@
 ## Category-zhCN: 函数库
 ## Category-zhTW: 函式庫
 
--- Themes
+# Themes
 Themes/Theme.lua
 
--- Internal Engine
+# Internal Engine
 Internal/Schema.lua
 Internal/State.lua
 Internal/Layout.lua
 Internal/Renderer.lua
 
--- Entry Point
+# Entry Point
 NoobTaco-Config.lua
 
--- Testing
+# Testing
 Tests/ConfigTest.lua

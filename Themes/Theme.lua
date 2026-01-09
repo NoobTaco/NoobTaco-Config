@@ -104,8 +104,13 @@ function Theme:GetAlertColor(severity)
   return unpack(color)
 end
 
-function Theme:GetButtonColorsForAlert(severity)
-  local r, g, b = self:GetAlertColor(severity)
+function Theme:GetButtonColorsForAlert(severity, overrideR, overrideG, overrideB)
+  local r, g, b
+  if overrideR and overrideG and overrideB then
+    r, g, b = overrideR, overrideG, overrideB
+  else
+    r, g, b = self:GetAlertColor(severity)
+  end
 
   -- Calculate hover (lighter)
   -- Mix with white for better visibility on bright colors
@@ -135,6 +140,41 @@ function Theme:UpdateButtonState(btn)
   end
 
   btn.bg:SetColorTexture(r, g, b, a)
+
+  -- Handle Text Color
+  if btn.Text then
+    if btn.customColors and btn.customColors.text then
+      btn.Text:SetTextColor(unpack(btn.customColors.text))
+    else
+      btn.Text:SetTextColor(self:GetColor("button_text"))
+    end
+  end
+end
+
+function Theme:GetButtonColorsForStyle(style)
+  style = string.lower(style or "secondary")
+
+  if style == "primary" or style == "accent" then
+    local r, g, b = self:GetColor("highlight")
+    return self:GetButtonColorsForAlert(style, r, g, b)
+  elseif style == "secondary" or style == "normal" then
+    return nil -- Use default theme colors
+  else
+    -- Alert styles (error, warning, success, info)
+    return self:GetButtonColorsForAlert(style)
+  end
+end
+
+local function TruncateText(fontString, text, maxWidth)
+  if not fontString or not text then return end
+  fontString:SetText(text)
+  if fontString:GetStringWidth() <= maxWidth then return end
+
+  local length = string.len(text)
+  while length > 0 and fontString:GetStringWidth() > maxWidth do
+    length = length - 1
+    fontString:SetText(string.sub(text, 1, length) .. "...")
+  end
 end
 
 function Theme:ApplyFont(fontString, weight, size)
@@ -193,9 +233,6 @@ function Theme:CreateThemedButton(parent)
   -- Theme Update Method
   btn.UpdateTheme = function(b)
     self:UpdateButtonState(b)
-    if b.Text then
-      b.Text:SetTextColor(self:GetColor("button_text"))
-    end
   end
 
   -- Scripts
@@ -218,6 +255,19 @@ function Theme:CreateThemedButton(parent)
   btn.SetSelected = function(b, selected)
     b.isSelected = selected
     self:UpdateButtonState(b)
+  end
+
+  btn.SetLabel = function(b, text)
+    b.fullText = text
+    local width = b:GetWidth()
+    local padding = 10
+    if width > 0 then
+      TruncateText(b.Text, text, width - padding)
+    else
+      -- If width is not yet set, set text directly and hope for the best,
+      -- or rely on a later call when width is known.
+      b.Text:SetText(text)
+    end
   end
 
   -- Turn on registration
