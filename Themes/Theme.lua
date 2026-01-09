@@ -3,7 +3,13 @@ local Theme = {}
 AddOn.ConfigTheme = Theme
 
 Theme.Current = "Default"
-local unpack = unpack
+
+-- Lua Globals
+local setmetatable, unpack, pairs = setmetatable, unpack, pairs
+local math, string = math, string
+
+-- Blizzard Globals
+local CreateFrame = CreateFrame
 
 Theme.Fonts = {
   Normal = "Interface\\AddOns\\NoobTaco-Config\\Media\\Fonts\\Poppins-Regular.ttf",

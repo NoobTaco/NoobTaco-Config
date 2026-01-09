@@ -1,4 +1,11 @@
 local _, AddOn = ...
+
+-- Lua Globals
+local pairs = pairs
+
+-- Blizzard Globals
+local wipe = wipe
+
 local ConfigState = {}
 AddOn.ConfigState = ConfigState
 

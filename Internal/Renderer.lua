@@ -1,4 +1,18 @@
 local _, AddOn = ...
+
+-- Lua Globals
+local _G = _G
+local type, tostring, tonumber, select, unpack = type, tostring, tonumber, select, unpack
+local pairs, ipairs, next = pairs, ipairs, next
+local math, table, string = math, table, string
+
+-- Blizzard Globals
+local CreateFrame = CreateFrame
+local PlaySoundFile = PlaySoundFile
+local GetBuildInfo = GetBuildInfo
+local GameTooltip = GameTooltip
+local wipe = wipe
+
 local ConfigRenderer = {}
 AddOn.ConfigRenderer = ConfigRenderer
 

@@ -1,4 +1,9 @@
 local _, AddOn = ...
+
+-- Lua Globals
+local type, tostring, ipairs = type, tostring, ipairs
+local string = string
+
 local Schema = {}
 AddOn.ConfigSchema = Schema
 

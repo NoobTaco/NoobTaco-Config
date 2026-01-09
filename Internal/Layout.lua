@@ -1,8 +1,13 @@
 local _, AddOn = ...
+
+-- Lua Globals
+local math = math
+
+-- Blizzard Globals
+local CreateFrame = CreateFrame
+
 local ConfigLayout = {}
 AddOn.ConfigLayout = ConfigLayout
-
-local CreateFrame = CreateFrame
 
 local Theme = AddOn.ConfigTheme
 
