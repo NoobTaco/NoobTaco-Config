@@ -1,11 +1,5 @@
-local _, AddOn = ...
-
--- Lua Globals
-local type, tostring, ipairs = type, tostring, ipairs
-local string = string
-
-local Schema = {}
-AddOn.ConfigSchema = Schema
+local Lib = LibStub("NoobTaco-Config-1.0")
+local Schema = Lib.Schema
 
 local VALID_TYPES = {
   ["group"] = true,

@@ -1,15 +1,7 @@
-local _, AddOn = ...
+local Lib = LibStub("NoobTaco-Config-1.0")
+local ConfigLayout = Lib.Layout
 
--- Lua Globals
-local math = math
-
--- Blizzard Globals
-local CreateFrame = CreateFrame
-
-local ConfigLayout = {}
-AddOn.ConfigLayout = ConfigLayout
-
-local Theme = AddOn.ConfigTheme
+local Theme = Lib.Theme
 
 
 function ConfigLayout:CreateTwoColumnLayout(parent)

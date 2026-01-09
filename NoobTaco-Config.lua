@@ -3,13 +3,20 @@
     Root entry point for the configuration library.
 ]]
 
--- Load Internal modules
--- Note: Order matters for dependencies
--- 1. Theme (Sets up colors and skinning foundations)
--- 2. Schema (Defines what a config looks like)
--- 3. State (Variables and storage)
--- 4. Layout (Positioning and container logic)
--- 5. Renderer (The visual engine)
+local MAJOR, MINOR = "NoobTaco-Config-1.0", 1
+local Lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 
--- The TOC will load this file.
--- In a standard library pattern, this file can also serve as the LibStub registration point.
+if not Lib then return end
+
+-- Initialize internal module references on the library object
+Lib.Schema = Lib.Schema or {}
+Lib.State = Lib.State or {}
+Lib.Layout = Lib.Layout or {}
+Lib.Renderer = Lib.Renderer or {}
+Lib.Theme = Lib.Theme or {}
+
+-- Public API
+function Lib:Register(projectName, configSchema, dbTable)
+    self.State:Initialize(dbTable)
+    -- Registration logic...
+end

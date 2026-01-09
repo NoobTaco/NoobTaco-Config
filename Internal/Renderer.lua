@@ -1,22 +1,9 @@
-local _, AddOn = ...
+local Lib = LibStub("NoobTaco-Config-1.0")
+local ConfigRenderer = Lib.Renderer
 
--- Lua Globals
-local tostring, tonumber, select = tostring, tonumber, select
-local ipairs = ipairs
-local math, table, string = math, table, string
-
--- Blizzard Globals
-local CreateFrame = CreateFrame
-local PlaySoundFile = PlaySoundFile
-local GetBuildInfo = GetBuildInfo
-local GameTooltip = GameTooltip
-
-local ConfigRenderer = {}
-AddOn.ConfigRenderer = ConfigRenderer
-
-local Theme = AddOn.ConfigTheme
-local State = AddOn.ConfigState
-local PixelUtil = AddOn.PixelUtil or PixelUtil
+local Theme = Lib.Theme
+local State = Lib.State
+local PixelUtil = Lib.PixelUtil or PixelUtil
 
 -- Simple Object Pool
 local FramePool = {}

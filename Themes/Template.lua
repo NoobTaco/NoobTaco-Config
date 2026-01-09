@@ -1,4 +1,4 @@
-local _, AddOn = ...
+local Lib = LibStub("NoobTaco-Config-1.0")
 
 --[[
   NoobTaco-Config Theme Template
@@ -6,8 +6,8 @@ local _, AddOn = ...
   Copy this file to create your own custom theme.
   Usage:
   1. Define your theme table following the structure below.
-  2. Call AddOn.ConfigTheme:RegisterTheme("YourThemeName", YourThemeTable)
-  3. Set the theme using AddOn.ConfigTheme:SetTheme("YourThemeName")
+  2. Call Lib.Theme:RegisterTheme("YourThemeName", YourThemeTable)
+  3. Set the theme using Lib.Theme:SetTheme("YourThemeName")
 ]]
 
 local MyCustomTheme = {
@@ -44,6 +44,6 @@ local MyCustomTheme = {
 }
 
 -- Register the theme if Config Lib is loaded
-if AddOn.ConfigTheme then
-  AddOn.ConfigTheme:RegisterTheme("MyCustomTheme", MyCustomTheme)
+if Lib and Lib.Theme then
+  Lib.Theme:RegisterTheme("MyCustomTheme", MyCustomTheme)
 end

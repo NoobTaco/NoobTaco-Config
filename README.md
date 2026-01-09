@@ -21,8 +21,9 @@ This library provides a way to generate WoW Interface Options panels dynamically
 - **ConfigLayout.lua**: Handles the high-level frame structure (Sidebar vs. Content) and navigation generation.
 - **ConfigRenderer.lua**: The core engine that parses the schema and instantiates UI widgets (Checkboxes, Sliders, Buttons).
 - **Load.xml**: XML loader to include the library in the TOC.
+- **LibStub.lua**: Standard Discord/WoW library versioning helper.
 
-> **Note**: These files are located in the `Internal/` directory in the source, but are exposed globally via `AddOn`.
+> **Note**: This library is registered with **LibStub** as `NoobTaco-Config-1.0`. 
 
 ## Usage
 
@@ -96,24 +97,27 @@ local schema = {
 }
 ```
 
-### 3. Register the Category
-Register the panel with the layout system.
+### 3. Register and Render
+Retrieve the library via LibStub and utilize its core modules.
 
 ```lua
 -- In your initialization code:
+local Lib = LibStub("NoobTaco-Config-1.0")
+if not Lib then return end
+
 local Category = Settings.RegisterCanvasLayoutCategory(MyPanel, "My Addon")
 Category.ID = "MyAddonConfig"
 Settings.RegisterAddOnCategory(Category)
 
--- Use the ConfigRenderer to draw the schema
-ConfigRenderer:Render(schema, MyPanel)
+-- Use the Renderer to draw the schema
+Lib.Renderer:Render(schema, MyPanel)
 ```
 
 ## Theming
-Themes are controlled via `ConfigTheme`. NoobTacoUI defaults to a specific aesthetic but you can switch themes programmatically:
+Themes are controlled via `Lib.Theme`. NoobTacoUI defaults to a specific aesthetic but you can switch themes programmatically:
 
 ```lua
-local Theme = AddOn.ConfigTheme
-Theme:SetTheme("Nord")
+local Lib = LibStub("NoobTaco-Config-1.0")
+Lib.Theme:SetTheme("Nord")
 -- Re-render or reload UI to apply
 ```

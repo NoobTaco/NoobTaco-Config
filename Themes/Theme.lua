@@ -1,6 +1,5 @@
-local _, AddOn = ...
-local Theme = {}
-AddOn.ConfigTheme = Theme
+local Lib = LibStub("NoobTaco-Config-1.0")
+local Theme = Lib.Theme
 
 Theme.Current = "NoobTaco"
 

@@ -1,13 +1,5 @@
-local _, AddOn = ...
-
--- Lua Globals
-local pairs = pairs
-
--- Blizzard Globals
-local wipe = wipe
-
-local ConfigState = {}
-AddOn.ConfigState = ConfigState
+local Lib = LibStub("NoobTaco-Config-1.0")
+local ConfigState = Lib.State
 
 ConfigState.ActiveDB = nil
 ConfigState.TempConfig = {}
@@ -74,8 +66,8 @@ function ConfigState:Commit()
   if self.OnDirtyChanged then self.OnDirtyChanged(false) end
 
   -- Trigger global update event if needed
-  if AddOn.OnConfigChanged then
-    AddOn.OnConfigChanged()
+  if Lib.OnConfigChanged then
+    Lib.OnConfigChanged()
   end
 end
 

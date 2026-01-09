@@ -1,8 +1,9 @@
-local Name, AddOn = ...
+local Name, _ = ...
+local Lib = LibStub("NoobTaco-Config-1.0")
 local ConfigTest = {}
 
 -- Only load if Config Lib is present
-if not AddOn.ConfigRenderer then return end
+if not Lib then return end
 
 -- ============================================================================
 -- PERSISTENT SCHEMAS
@@ -38,7 +39,7 @@ local function BuildSchemas()
           { label = "Catppuccin", value = "Catppuccin" },
         },
         onChange = function(value)
-          AddOn.ConfigTheme:SetTheme(value)
+          Lib.Theme:SetTheme(value)
         end
       },
 
@@ -112,12 +113,12 @@ local function BuildSchemas()
             return copy
           end
 
-          local testTheme = deepCopy(AddOn.ConfigTheme.Presets.Default)
+          local testTheme = deepCopy(Lib.Theme.Presets.Default)
           testTheme.alert.success = { 0, 1, 1, 1 }     -- Cyan for success
           testTheme.button.normal = { 0.5, 0, 0.5, 1 } -- Purple Buttons
 
-          AddOn.ConfigTheme:RegisterTheme("TestTheme", testTheme)
-          AddOn.ConfigTheme:SetTheme("TestTheme")
+          Lib.Theme:RegisterTheme("TestTheme", testTheme)
+          Lib.Theme:SetTheme("TestTheme")
           print("Applied TestTheme (Cyan Success, Purple Buttons)")
         end
       },
@@ -125,7 +126,7 @@ local function BuildSchemas()
         type = "button",
         label = "Reset Theme",
         onClick = function()
-          AddOn.ConfigTheme:SetTheme("Default")
+          Lib.Theme:SetTheme("Default")
           print("Reset to Default Theme")
         end
       },
@@ -454,40 +455,40 @@ function ConfigTest:RenderContent(parent)
     debugLevel = "WARN",
     selectedSound = "Sound\\Interface\\RaidWarning.ogg"
   }
-  AddOn.ConfigState:Initialize(DummyDB)
+  Lib.State:Initialize(DummyDB)
 
   -- Layout Initialization (only once)
   local layout = parent.Layout
   if not layout then
-    layout = AddOn.ConfigLayout:CreateTwoColumnLayout(parent)
+    layout = Lib.Layout:CreateTwoColumnLayout(parent)
     parent.Layout = layout
     layout:SetScale(1.0)
 
     -- Populate Sidebar using PERSISTENT schema references
-    AddOn.ConfigLayout:AddSidebarButton(layout, "about", "About", function()
-      AddOn.ConfigState:SetValue("lastSection", "about")
-      AddOn.ConfigRenderer:Render(Schemas.About, layout)
+    Lib.Layout:AddSidebarButton(layout, "about", "About", function()
+      Lib.State:SetValue("lastSection", "about")
+      Lib.Renderer:Render(Schemas.About, layout)
     end)
-    AddOn.ConfigLayout:AddSidebarButton(layout, "general", "General Settings", function()
-      AddOn.ConfigState:SetValue("lastSection", "general")
-      AddOn.ConfigRenderer:Render(Schemas.General, layout)
+    Lib.Layout:AddSidebarButton(layout, "general", "General Settings", function()
+      Lib.State:SetValue("lastSection", "general")
+      Lib.Renderer:Render(Schemas.General, layout)
     end)
-    AddOn.ConfigLayout:AddSidebarButton(layout, "profiles", "Profiles", function()
-      AddOn.ConfigState:SetValue("lastSection", "profiles")
-      AddOn.ConfigRenderer:Render(Schemas.Profiles, layout)
+    Lib.Layout:AddSidebarButton(layout, "profiles", "Profiles", function()
+      Lib.State:SetValue("lastSection", "profiles")
+      Lib.Renderer:Render(Schemas.Profiles, layout)
     end)
-    AddOn.ConfigLayout:AddSidebarButton(layout, "buttons", "Experiments", function()
-      AddOn.ConfigState:SetValue("lastSection", "buttons")
-      AddOn.ConfigRenderer:Render(Schemas.Buttons, layout)
+    Lib.Layout:AddSidebarButton(layout, "buttons", "Experiments", function()
+      Lib.State:SetValue("lastSection", "buttons")
+      Lib.Renderer:Render(Schemas.Buttons, layout)
     end)
-    AddOn.ConfigLayout:AddSidebarButton(layout, "advanced", "Advanced", function()
-      AddOn.ConfigState:SetValue("lastSection", "advanced")
-      AddOn.ConfigRenderer:Render(Schemas.Advanced, layout)
+    Lib.Layout:AddSidebarButton(layout, "advanced", "Advanced", function()
+      Lib.State:SetValue("lastSection", "advanced")
+      Lib.Renderer:Render(Schemas.Advanced, layout)
     end)
   end
 
   -- Initial Render (Restore last section)
-  local lastSection = AddOn.ConfigState:GetValue("lastSection") or "about"
+  local lastSection = Lib.State:GetValue("lastSection") or "about"
   local sectionSchemas = {
     about = Schemas.About,
     general = Schemas.General,
@@ -496,8 +497,8 @@ function ConfigTest:RenderContent(parent)
     buttons = Schemas.Buttons
   }
 
-  AddOn.ConfigLayout:SelectSidebarButton(layout, lastSection)
-  AddOn.ConfigRenderer:Render(sectionSchemas[lastSection] or Schemas.About, layout)
+  Lib.Layout:SelectSidebarButton(layout, lastSection)
+  Lib.Renderer:Render(sectionSchemas[lastSection] or Schemas.About, layout)
 end
 
 -- Initialize on Login

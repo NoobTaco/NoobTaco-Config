@@ -17,6 +17,10 @@
 ## Category-zhCN: 函数库
 ## Category-zhTW: 函式庫
 
+# Core LibStub
+Internal/LibStub.lua
+NoobTaco-Config.lua
+
 # Themes
 Themes/Theme.lua
 
@@ -26,8 +30,5 @@ Internal/State.lua
 Internal/Layout.lua
 Internal/Renderer.lua
 
-# Entry Point
-NoobTaco-Config.lua
-
 # Testing
-# Tests/ConfigTest.lua
+Tests/ConfigTest.lua
