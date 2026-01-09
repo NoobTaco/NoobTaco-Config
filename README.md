@@ -71,12 +71,10 @@ local schema = {
             onButtonClick = function() print("Import Clicked") end
         },
         {
-            type = "expandable",
-            label = "Expandable Section",
-            status = "Status Badge", -- Optional
-            expanded = false,        -- Initial state
+            type = "card",
+            label = "Profile Section",
             children = {
-                 { type = "description", text = "Nested content goes here." },
+                 { type = "description", text = "Card content with bordered container." },
                  { type = "button", label = "Action", onClick = function() end }
             }
         }
