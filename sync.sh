@@ -15,15 +15,19 @@ if [ ! -d "$TARGET_DIR" ]; then
     mkdir -p "$TARGET_DIR"
 fi
 
-echo "Syncing Core and Media to $TARGET_DIR..."
+echo "Syncing Internal, Themes, and Media to $TARGET_DIR..."
 
-# Sync Core
-rsync -av --delete Core/ "$TARGET_DIR/Core/"
+# Sync Internal
+rsync -av --delete Internal/ "$TARGET_DIR/Internal/"
+
+# Sync Themes
+rsync -av --delete Themes/ "$TARGET_DIR/Themes/"
 
 # Sync Media
 rsync -av --delete Media/ "$TARGET_DIR/Media/"
 
-# Sync LICENSE
+# Sync Root Lua Files
+cp NoobTaco-Config.lua "$TARGET_DIR/"
 cp LICENSE "$TARGET_DIR/"
 
 echo "Sync Complete!"

@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.1] - 2026-01-09
+### Added
+- **Theme Color Tokens**: Enabled the use of theme-defined color tokens (e.g., `|chighlight|`, `|cheader|`, `|ctext|`) within strings for headers, descriptions, callouts, and alerts.
+- **Dynamic Hex Conversion**: New `Theme:GetColorHex(key)` and `Theme:ProcessText(text)` methods to handle live conversion of theme colors to WoW-compatible hex format.
+
+### Changed
+- **Renderer Optimization**: widgets now store `rawText` to allow for re-processing with new theme colors when the active theme is changed, ensuring inline colors remain accurate.
+
+### Fixed
+- **Redundant Rendering**: Removed redundant `SetText` calls in `Renderer.lua` that were bypassing the theme processing logic and causing tokens to display as raw strings.
+- **Rounding Accuracy**: Improved hex color conversion rounding in `Theme:GetColorHex` to prevent slight color offsets in rendered text.
+
 ## [1.1.0] - 2026-01-09
 ### Added
 - **Dynamic Media Pathing**: Introduced `Lib.Media` to automatically detect and resolve asset paths (fonts, icons) whether the library is running standalone or embedded in another addon.

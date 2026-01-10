@@ -66,6 +66,27 @@ Lib.Theme:RegisterTheme("MyCustomTheme", themeTable)
 Lib.Theme:SetTheme("NoobTaco") -- NoobTaco, Nord, Catppuccin
 ```
 
+### Theme Color Tokens
+The library supports dynamic color tokens within strings (headers, descriptions, callouts, alerts). These tokens are automatically replaced with the current theme's hex colors and update live when the theme is changed.
+
+Use the format `|ctoken|` where `token` is a valid theme key.
+
+**Available Tokens:**
+- `|cheader|`: The header/accent color.
+- `|chighlight|`: The primary highlight color (e.g. Burnt Sienna in NoobTaco).
+- `|ctext|`: The standard body text color.
+- `|cborder|`: The theme's border color.
+- `|cbackground|`: The theme's background color.
+
+**Example:**
+```lua
+{ 
+    type = "description", 
+    text = "|chighlight|Important:|r This setting requires a UI reload." 
+}
+```
+*Note: The library automatically appends the `|r` if you forget it, but it's best practice to include it for complex strings.*
+
 ## 5. Media & Assets
 Use `Lib.Media` to get the base path for library assets. This ensures correct paths whether the library is standalone or embedded.
 

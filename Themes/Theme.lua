@@ -107,7 +107,22 @@ function Theme:GetColor(key)
   if key == "button_selected" then return unpack(preset.button.selected) end
   if key == "button_text" then return unpack(preset.button.text) end
 
+  -- Support alert/severity colors as keys (for inline tokens)
+  if preset.alert and preset.alert[key] then
+    return unpack(preset.alert[key])
+  end
+
   return 1, 1, 1, 1
+end
+
+function Theme:GetColorHex(key)
+  local r, g, b, a = self:GetColor(key)
+  -- Convert 0-1 to 0-255 and round to nearest integer
+  r = math.floor(r * 255 + 0.5)
+  g = math.floor(g * 255 + 0.5)
+  b = math.floor(b * 255 + 0.5)
+  a = math.floor((a or 1) * 255 + 0.5)
+  return string.format("%02x%02x%02x%02x", a, r, g, b)
 end
 
 function Theme:GetFont(weight)
@@ -228,6 +243,27 @@ end
 function Theme:ApplyFont(fontString, weight, size)
   if not fontString then return end
   fontString:SetFont(self:GetFont(weight or "Normal"), size or 12, "")
+end
+
+function Theme:ProcessText(text)
+  if not text or type(text) ~= "string" then return text end
+
+  -- Replace |cTOKEN| with |cAARRGGBB|
+  -- We use a more specific pattern to ensure we only match our tokens
+  return text:gsub("|c([^|%s]+)|", function(token)
+    -- If it's already a hex color (8 chars), leave it alone
+    if #token == 8 and token:find("^%x+$") then
+      return "|c" .. token
+    end
+
+    local hex = self:GetColorHex(token)
+    if hex and hex ~= "ffffffff" or token == "text" then
+      return "|c" .. hex
+    end
+
+    -- Fallback: return original if token not found or is default white
+    return "|c" .. token .. "|"
+  end)
 end
 
 -- Weak table to track objects that need theme updates

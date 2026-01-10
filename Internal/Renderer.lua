@@ -428,6 +428,14 @@ local function GetFrame(frameType, parent)
         self:SetBackdropBorderColor(r, g, b, 1)
         self.Title:SetTextColor(r, g, b)
 
+        -- Update processed text with theme tokens
+        if self.rawText then
+          self.Text:SetText(Theme:ProcessText(self.rawText))
+        end
+        if self.rawTitle then
+          self.Title:SetText(Theme:ProcessText(self.rawTitle))
+        end
+
         -- Button
         self.Button.customColors = Theme:GetButtonColorsForAlert(severity)
         Theme:UpdateButtonState(self.Button)
@@ -448,18 +456,27 @@ local function GetFrame(frameType, parent)
         self.bg:SetColorTexture(r, g, b, 0.2)
         self.text:SetTextColor(r, g, b, 1)
         Theme:ApplyFont(self.text, "Normal", 12)
+        if self.rawText then
+          self.text:SetText(Theme:ProcessText(self.rawText))
+        end
       end
       Theme:RegisterT(frame)
     elseif frameType == "header" then
       frame.UpdateTheme = function(self)
         Theme:ApplyFont(self.text, "Bold", 14)
         self.text:SetTextColor(Theme:GetColor("header"))
+        if self.rawText then
+          self.text:SetText(Theme:ProcessText(self.rawText))
+        end
       end
       Theme:RegisterT(frame)
     elseif frameType == "description" then
       frame.UpdateTheme = function(self)
         Theme:ApplyFont(self.text, "Normal", 12)
         self.text:SetTextColor(Theme:GetColor("text"))
+        if self.rawText then
+          self.text:SetText(Theme:ProcessText(self.rawText))
+        end
       end
       Theme:RegisterT(frame)
     elseif frameType == "checkbox" then
@@ -467,6 +484,9 @@ local function GetFrame(frameType, parent)
         if self.Text then
           Theme:ApplyFont(self.Text, "Normal", 12)
           self.Text:SetTextColor(Theme:GetColor("text"))
+          if self.rawText then
+            self.Text:SetText(Theme:ProcessText(self.rawText))
+          end
         end
       end
       Theme:RegisterT(frame)
@@ -716,26 +736,40 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
   -- Setup basic props
   if item.label then
     if item.type == "checkbox" or item.type == "slider" then
-      if frame.Text then frame.Text:SetText(item.label) end
+      frame.rawText = item.label
+      if frame.Text then frame.Text:SetText(Theme:ProcessText(item.label)) end
     elseif item.type == "editbox" or item.type == "dropdown" or item.type == "colorpicker" or item.type == "media" then
-      if frame.Label then frame.Label:SetText(item.label) end
-    elseif item.type == "header" then
-      frame.text:SetText(item.label)
-    elseif item.type == "description" then
-      frame.text:SetText(item.label)
-    elseif item.type == "button" then
-      -- frame.Text:SetText(item.label) -- Handled later after sizing
-
-      -- Handle styling
-      frame.style = item.style
-      frame.customColors = item.customColors
-      Theme:UpdateButtonState(frame)
+      if frame.Label then frame.Label:SetText(Theme:ProcessText(item.label)) end
     end
   end
 
+  -- Handle types that use 'text' or both
+  if item.type == "alert" then
+    frame.rawText = item.text
+    frame.text:SetText(Theme:ProcessText(item.text))
+    frame.severity = item.severity
+    if frame.UpdateTheme then frame:UpdateTheme() end
+  elseif item.type == "header" then
+    local label = item.label or item.text
+    frame.rawText = label
+    frame.text:SetText(Theme:ProcessText(label))
+  elseif item.type == "description" then
+    local text = item.text or item.label
+    frame.rawText = text
+    frame.text:SetText(Theme:ProcessText(text))
+  elseif item.type == "button" then
+    -- frame.Text:SetText(item.label) -- Handled later after sizing
+    -- Handle styling
+    frame.style = item.style
+    frame.customColors = item.customColors
+    Theme:UpdateButtonState(frame)
+  end
+
   if item.type == "callout" then
-    frame.Title:SetText(item.title)
-    frame.Text:SetText(item.text)
+    frame.rawTitle = item.title
+    frame.rawText = item.text
+    frame.Title:SetText(Theme:ProcessText(item.title))
+    frame.Text:SetText(Theme:ProcessText(item.text))
     frame.Button.Text:SetText(item.buttonText or "Click Me")
   end
 
@@ -944,7 +978,7 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
 
   if item.type == "alert" then
     frame.severity = item.severity
-    if item.text then frame.text:SetText(item.text) end
+    -- if item.text then frame.text:SetText(item.text) end -- BROKEN: Overwrites processed text
     if frame.UpdateTheme then frame:UpdateTheme() end
     if PixelUtil then PixelUtil.SetSize(frame, cursor.maxWidth, 30) else frame:SetSize(cursor.maxWidth, 30) end
   elseif item.type == "header" then
@@ -971,8 +1005,8 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
         totalHeight)
     end
   elseif item.type == "description" then
-    frame.text:SetWidth(cursor.maxWidth)                -- Fix width for wrap
-    if item.text then frame.text:SetText(item.text) end -- Prioritize text prop or label
+    frame.text:SetWidth(cursor.maxWidth) -- Fix width for wrap
+    -- if item.text then frame.text:SetText(item.text) end -- BROKEN: Overwrites processed text
     local height = frame.text:GetStringHeight()
     if height == 0 then
       -- Improved fallback: estimate based on text length and width
@@ -1041,6 +1075,7 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
     end
   elseif item.type == "about" then
     -- Populate Data
+    -- Data should already be set in about widget but we need to ensure icon
     if item.icon then
       frame.Icon:SetTexture(item.icon)
       frame.Icon:Show()
@@ -1048,9 +1083,12 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
       frame.Icon:Hide()
     end
 
-    frame.Title:SetText(item.title or "NoobTacoUI")
-    frame.Version:SetText(item.version or "")
-    frame.Description:SetText(item.description or "")
+    -- Process strings for about page too
+    frame.rawTitle = item.title
+    frame.rawText = item.description
+    frame.Title:SetText(Theme:ProcessText(item.title or "NoobTacoUI"))
+    frame.Version:SetText(Theme:ProcessText(item.version or ""))
+    frame.Description:SetText(Theme:ProcessText(item.description or ""))
 
     local width = cursor.maxWidth
     frame:SetWidth(width)
