@@ -1,44 +1,29 @@
-# Lib: NoobTaco-Config
+# NoobTaco-Config
 
 [![CI](https://github.com/NoobTaco/NoobTaco-Config/actions/workflows/ci.yml/badge.svg)](https://github.com/NoobTaco/NoobTaco-Config/actions/workflows/ci.yml) [![Release](https://github.com/NoobTaco/NoobTaco-Config/actions/workflows/release.yml/badge.svg)](https://github.com/NoobTaco/NoobTaco-Config/actions/workflows/release.yml)
 
-A modular, schema-driven configuration framework for NoobTacoUI.
+**NoobTaco-Config** is a modular, schema-driven configuration framework for World of Warcraft addons. Designed with a focus on "pixel-perfect" aesthetics and ease of use, it allows developers to build complex, themed options menus using simple Lua tables.
 
-## Overview
+## 📸 Screenshots
 
-This library provides a way to generate WoW Interface Options panels dynamically using Lua table schemas. It supports:
-- **Declarative Schema**: Define UI elements in a simple table structure.
-- **Two-Column Layout**: Automatic sidebar navigation and content area.
-- **State Management**: Transactional state with commit/revert capabilities.
-- **Theming**: Built-in support for switching color themes (NoobTaco, Nord, Catppuccin) and fonts (Poppins).
-- **Inline Color Tokens**: Use `|ctoken|` (e.g., `|chighlight|`) in strings to dynamically apply theme colors to text in headers, descriptions, and alerts.
-- **Nested Data Support**: Support for dot-notation in widget IDs (e.g., `GeneralSettings.hide`) to map directly to nested SavedVariables structures.
-- **Checkbox Inversion**: `invertValue` property for checkboxes to support "hide" style settings.
-- **Custom Rendering**: "Pixel-perfect" rendering for all interactive components with a consistent 1px border aesthetic.
-- **Embedded vs Standalone**: Automatic path detection for assets when embedded in other addons.
+| Overview | Theme Support |
+| :---: | :---: |
+| ![Welcome](./Media/Screenshots/noobtaco-config-welcome-ss.png) | ![Themes](./Media/Screenshots/noobtaco-config-theme-catppuccin-ss.png) |
 
-## File Structure
+> [!TIP]
+> Use the [Library Showcase](Tests/ConfigTest.lua) in-game to see the dynamic theming and all widgets in action.
 
-- **NoobTaco-Config.lua**: Root entry point and dynamic media path helper.
-- **NoobTaco-Config.toc**: Addon manifest.
-- **Internal/**: Core engine modules.
-  - **Schema.lua**: Validators and schema definition helpers.
-  - **State.lua**: Manages configuration data and transaction buffers.
-  - **Layout.lua**: Handles frame structure and navigation.
-  - **Renderer.lua**: The core engine that parses schemas and instantiates UI widgets.
-- **Themes/Theme.lua**: Defines color palettes, fonts, and styling factories.
-- **Media/**:
-  - **Fonts/**: Poppins fonts.
-  - **Textures/**: Library UI assets (Logo, etc.).
-- **LibStub.lua**: Standard library versioning helper.
+## ✨ Features
 
-> **Note**: This library is registered with **LibStub** as `NoobTaco-Config-1.0`. 
+- 🛠️ **Declarative Schemas**: Define your entire UI layout in nested Lua tables.
+- 🎨 **Dynamic Theming**: Built-in support for **NoobTaco**, **Nord**, and **Catppuccin** themes.
+- 🔡 **Modern Typography**: Integrated with the **Poppins** font family for a sleek look.
+- ⚡ **Transactional State**: Built-in commit/revert logic for user settings.
+- 🌈 **Inline Color Tokens**: Use `|ctoken|` (e.g., `|chighlight|`) to dynamically style text based on the active theme.
+- 📁 **Nested Data**: Native support for dot-notation in IDs to map directly to complex SavedVariables.
+- 🔊 **Media Previewing**: Specialized media widgets with built-in playback for sounds.
 
-## Quick Reference
-- [Configuration Cheat Sheet](docs/CHEAT_SHEET.md) - Full list of all available containers and elements.
-- [API Reference](docs/API_REFERENCE.md) - Technical documentation for library usage.
-
-## Usage
+## 🚀 Quick Start
 
 ### 1. Initialization
 Retrieve the library via LibStub.
@@ -49,52 +34,30 @@ if not Lib then return end
 ```
 
 ### 2. Create a Schema
-Define the layout of your settings panel. The renderer supports a wide variety of widgets:
+Define the layout of your settings panel.
 
-#### Basic Widgets
-- `checkbox`: Boolean toggles.
-- `slider`: Range selection with real-time value indicators.
-- `editbox`: Text input.
-- `dropdown`: Selection from a list.
-- `button`: Custom actions.
-- `header` & `description`: Text content and separators.
-
-#### Advanced Widgets
-- `media`: Specialized dropdown for sound/media paths with audio preview.
-- `callout`: Alert-style containers for important information (warning, error, success, info).
-- `card`: Bordered containers for grouping related settings.
-- `about`: Standardized branding section with logo, version, description, and links.
-
-### Example Schema
 ```lua
 local schema = {
     type = "group",
     label = "General Settings",
     children = {
         {
-            type = "checkbox",
-            label = "Enable Feature",
-            id = "enableFeature",
-            default = true
-        },
-        {
-            type = "card",
-            label = "Profile Management",
-            children = {
-                 { type = "description", text = "Manage your active profiles here." },
-                 { type = "button", label = "Reset Profile", onClick = function() end }
+            type = "about",
+            icon = [[Interface\AddOns\MyAddon\Media\Logo]],
+            title = "My Addon",
+            version = "1.0.0",
+            description = "A powerful configuration suite.",
+            links = {
+                { label = "GitHub", url = "https://github.com/..." }
             }
         },
         {
-             type = "about",
-             icon = "Interface\\AddOns\\MyAddon\\Media\\Logo",
-             title = "My Addon",
-             version = "1.1.0",
-             description = "Full configuration suite.",
-             links = {
-                { label = "Discord", url = "https://discord.gg/..." },
-                { label = "GitHub", url = "https://github.com/..." }
-             }
+            type = "card",
+            label = "Feature Settings",
+            children = {
+                 { id = "enableFeature", type = "checkbox", label = "Enable Magic", default = true },
+                 { id = "powerLevel", type = "slider", label = "Power Level", min = 0, max = 100, default = 9000 }
+            }
         }
     }
 }
@@ -102,26 +65,27 @@ local schema = {
 
 ### 3. Rendering
 ```lua
--- Register within Blizzard Settings
-local category = Settings.RegisterCanvasLayoutCategory(myPanel, "My Addon")
-Settings.RegisterAddOnCategory(category)
-
--- Render the schema
+-- Render directly to a Blizzard category frame
 Lib.Renderer:Render(schema, myPanel)
 ```
 
-## Embedding & Dynamic Media
+## 🖼️ UI Showcase
 
-When embedding `NoobTaco-Config` in your own addon, use the `Lib.Media` constant to reference fonts and textures. It automatically detects if the library is running standalone or as a sub-library and returns the correct interface path.
+| Inputs & Widgets | Buttons | Feedback & Alerts |
+| :---: | :---: | :---: |
+| ![Inputs](./Media/Screenshots/noobtaco-config-inputs-ss.png) | ![Buttons](./Media/Screenshots/noobtaco-config-button-ss.png) | ![Feedback](./Media/Screenshots/noobtaco-config-feedback-ss.png) |
 
-```lua
-local Lib = LibStub("NoobTaco-Config-1.0")
-local fontPath = Lib.Media .. "\\Fonts\\Poppins-Regular.ttf"
-```
+## 🧪 Theme Engine
+The library supports instant theme switching. All colors, including inline tokens, update in real-time.
 
-## Theming
-Switch themes programmatically:
+| NoobTaco (Standard) | Nord (Frost) | Catppuccin (Mocha) |
+| :---: | :---: | :---: |
+| ![NoobTaco](./Media/Screenshots/noobtaco-config-theme-noobtaco-ss.png) | ![Nord](./Media/Screenshots/noobtaco-config-theme-nord-ss.png) | ![Catppuccin](./Media/Screenshots/noobtaco-config-theme-catppuccin-ss.png) |
 
-```lua
-Lib.Theme:SetTheme("Catppuccin") -- NoobTaco (Default), Nord, Catppuccin
-```
+## 📚 Documentation
+
+- [Configuration Cheat Sheet](docs/CHEAT_SHEET.md) - All available containers and elements.
+- [API Reference](docs/API_REFERENCE.md) - Detailed technical documentation.
+
+## 📄 License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

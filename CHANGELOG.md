@@ -2,6 +2,8 @@
 
 ## [1.1.3] - 2026-01-10
 ### Added
+- **README Overhaul**: Completely redesigned the `README.md` with a more visual, structural, and professional layout geared towards GitHub, CurseForge, and Wago.
+- **Embedded Screenshots**: Integrated high-quality screenshots directly into the repository and documentation to showcase all library widgets and themes.
 - **Logo Asset Management**: Relocated the library logo to `Media/Textures/Logo.png` and updated the `.toc` file to follow Blizzard's asset path requirements.
 
 ### Changed
