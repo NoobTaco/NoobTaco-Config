@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.2.1] - 2026-01-10
+### Fixed
+- **Media Widget onChange**: Added missing `onChange` callback support when selecting items from the media dropdown.
+- **Media Preview Path**: Fixed sound preview to use `opt.path` (the actual file path) instead of just `opt.value` (the sound name), ensuring sounds play correctly.
+
 ## [1.2.0] - 2026-01-10
 ### Added
 - **Load Hardening:** Implemented a "Gatekeeper" flag (`NOOBTACO_CONFIG_SHOULD_LOAD`) to prevent older versions of the library (embedded in other addons) from overwriting newer, active versions.
