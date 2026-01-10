@@ -43,7 +43,6 @@ Schemas are tables defining your UI components.
 | `callout` | `title`, `text`, `buttonText`, `style` ("warning", "error", "success", "info"), `onButtonClick` |
 | `card` | `label`, `children` |
 | `about` | `icon`, `title`, `version`, `description`, `links` ({label, url}) |
-| `expandable` | `label`, `children` |
 
 ### Example Schema
 ```lua

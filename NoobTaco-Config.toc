@@ -3,7 +3,7 @@
 ## Notes: Standalone Configuration Library
 ## Author: NoobTaco
 ## Version: @project-version@
-## IconTexture: Interface\AddOns\NoobTaco-Config\Media\Logo
+## IconTexture: Interface\AddOns\NoobTaco-Config\Media\Textures\Logo.png
 ## X-GitHub-Project: NoobTaco/NoobTaco-Config
 ## X-GitHub-Repository: https://github.com/NoobTaco/NoobTaco-Config
 ## X-GitHub-Repository-Type: library
@@ -38,4 +38,4 @@ Internal/Layout.lua
 Internal/Renderer.lua
 
 # Testing
-# Tests/ConfigTest.lua
+Tests/ConfigTest.lua

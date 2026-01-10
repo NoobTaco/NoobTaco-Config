@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.3] - 2026-01-10
+### Added
+- **Logo Asset Management**: Relocated the library logo to `Media/Textures/Logo.png` and updated the `.toc` file to follow Blizzard's asset path requirements.
+
+### Changed
+- **Asset Resolution**: `ConfigTest.lua` now utilizes the `Lib.Media` helper for more robust asset pathing, ensuring correct icon rendering in different project environments.
+- **PNG Support**: Standardized on `.png` extensions for external assets to ensure proper rendering via `SetTexture` in modern WoW clients.
+
+### Fixed
+- **Layout Alignment**: Refactored the internal rendering engine to generically calculate label dimensions. This resolves alignment issues where widgets like `editbox`, `dropdown`, and `media` were shifted due to uncalculated top label offsets.
+- **Side Label Measurements**: Improved width calculations for widgets with side labels (`checkbox`, `colorpicker`) to prevent layout clumping.
+
 ## [1.1.2] - 2026-01-09
 ### Added
 - **Nested Path Support**: `Lib.State` now supports dot-notation for IDs (e.g., `GeneralSettings.hide`), allowing settings to be mapped directly to nested database tables.

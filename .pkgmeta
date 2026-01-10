@@ -8,7 +8,6 @@ ignore:
   - .luacheckrc
   - .github
   - .vscode
-  - API_REFERENCE.md
   - docs
   - CHANGELOG.md
   - README.md

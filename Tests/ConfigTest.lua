@@ -5,389 +5,254 @@ local ConfigTest = {}
 -- Only load if Config Lib is present
 if not Lib then return end
 
--- ============================================================================
--- PERSISTENT SCHEMAS
--- These are defined once and persist across reloads/re-renders.
--- This prevents closures from capturing stale local references.
--- ============================================================================
 ConfigTest.Schemas = {}
 
 local function BuildSchemas()
   if ConfigTest.Schemas.General then return end -- Already built
 
-  ConfigTest.Schemas.General = {
-    type = "group",
-    children = {
-      { type = "header",      label = "General Settings" },
-      { type = "description", text = "Here you can configure the general options for NoobTacoUI. These settings affect the overall behavior of the addon." },
-
-      { type = "header",      label = "Interface" },
-      { id = "enableMinimap", type = "checkbox",                                                                                                           label = "Show Minimap Icon", default = true },
-      { id = "globalScale",   type = "slider",                                                                                                             label = "Global Scale",      min = 0.5,         max = 2.0, step = 0.1, default = 1.0 },
-      { id = "accentColor",   type = "colorpicker",                                                                                                        label = "Accent Color",      default = "00A8FF" },
-
-      { type = "header",      label = "Theme" },
-      {
-        id = "activeTheme",
-        type = "dropdown",
-        label = "UI Theme",
-        default = "NoobTaco",
-        options = {
-          { label = "NoobTaco",   value = "NoobTaco" },
-          { label = "Default",    value = "Default" },
-          { label = "Nord",       value = "Nord" },
-          { label = "Catppuccin", value = "Catppuccin" },
-        },
-        onChange = function(value)
-          Lib.Theme:SetTheme(value)
-        end
-      },
-
-      { type = "header",     label = "Notifications" },
-      { id = "enableToasts", type = "checkbox",      label = "Enable Toast Notifications", default = true },
-      { id = "soundEnabled", type = "checkbox",      label = "Play Sounds",                default = false },
-    }
-  }
-
-  ConfigTest.Schemas.Advanced = {
-    type = "group",
-    children = {
-      { type = "header", label = "Advanced Configuration 2" },
-      { type = "alert",  severity = "warning",              text = "WARNING: Caution: Changing these settings may cause instability." },
-      { type = "alert",  severity = "INFO",                 text = "INFO: ALL GOOD: Another warning Box." },
-      { type = "alert",  severity = "ERROR",                text = "ERROR: ALL BAD: Another warning Box." },
-      { type = "alert",  severity = "SUCCESS",              text = "SUCCESS: ALL GOOD: Another warning Box." },
-      {
-        type = "callout",
-        title = "STEP 1: MANDATORY EDIT MODE SETUP",
-        text =
-        "To ensure NoobTacoUI works as intended, you MUST import the optimized layout. Click the button, copy the string (CTRL+C), then open WoW Edit Mode and click 'Import'. We recommend naming the profile 'NoobTacoUI', but you can use any name you prefer.",
-        buttonText = "GET IMPORT STRING",
-        style = "warning",
-        onButtonClick = function() print("Get Import String Clicked") end
-      },
-      {
-        type = "callout",
-        title = "STEP 2: TESTING",
-        text =
-        "To ensure NoobTacoUI works as intended, you MUST import the optimized layout. Click the button, copy the string (CTRL+C), then open WoW Edit Mode and click 'Import'. We recommend naming the profile 'NoobTacoUI', but you can use any name you prefer.",
-        buttonText = "GET IMPORT STRING",
-        style = "INFO",
-        onButtonClick = function() print("Get Import String Clicked") end
-      },
-      {
-        type = "callout",
-        title = "STEP 3: SUCCESS EXAMPLE",
-        text = "This is a success callout. It should be green.",
-        buttonText = "SUCCESS BUTTON",
-        style = "success",
-        onButtonClick = function() print("Success Clicked") end
-      },
-      {
-        type = "callout",
-        title = "STEP 4: ERROR EXAMPLE",
-        text = "This is an error callout. It should be red.",
-        buttonText = "ERROR BUTTON",
-        style = "error",
-        onButtonClick = function() print("Error Clicked") end
-      },
-
-      { type = "header", label = "Theme Testing" },
-      {
-        type = "button",
-        label = "Apply Custom Theme",
-        onClick = function()
-          -- Create a deep copy of Default to avoid mutating it
-          local function deepCopy(orig)
-            local orig_type = type(orig)
-            local copy
-            if orig_type == 'table' then
-              copy = {}
-              for orig_key, orig_value in next, orig, nil do
-                copy[deepCopy(orig_key)] = deepCopy(orig_value)
-              end
-              setmetatable(copy, deepCopy(getmetatable(orig)))
-            else -- number, string, boolean, etc
-              copy = orig
-            end
-            return copy
-          end
-
-          local testTheme = deepCopy(Lib.Theme.Presets.Default)
-          testTheme.alert.success = { 0, 1, 1, 1 }     -- Cyan for success
-          testTheme.button.normal = { 0.5, 0, 0.5, 1 } -- Purple Buttons
-
-          Lib.Theme:RegisterTheme("TestTheme", testTheme)
-          Lib.Theme:SetTheme("TestTheme")
-          print("Applied TestTheme (Cyan Success, Purple Buttons)")
-        end
-      },
-      {
-        type = "button",
-        label = "Reset Theme",
-        onClick = function()
-          Lib.Theme:SetTheme("Default")
-          print("Reset to Default Theme")
-        end
-      },
-
-      { type = "header", label = "Developer Options" },
-      { id = "apiKey",   type = "editbox",           label = "API Key", default = "" },
-      {
-        id = "debugLevel",
-        type = "dropdown",
-        label = "Debug Level",
-        default = "INFO",
-        options = {
-          { label = "Information", value = "INFO" },
-          { label = "Warning",     value = "WARN" },
-          { label = "Error",       value = "ERROR" },
-        }
-      },
-
-      { type = "header", label = "Positioning" },
-      {
-        type = "row",
-        children = {
-          { id = "posX", type = "slider", label = "X Offset", min = -500, max = 500, default = 0 },
-          { id = "posY", type = "slider", label = "Y Offset", min = -500, max = 500, default = 0 },
-        }
-      }
-    }
-  }
-
+  -- 1. ABOUT SECTION
   ConfigTest.Schemas.About = {
     type = "group",
     children = {
       {
         type = "about",
-        icon = "Interface\\AddOns\\NoobTacoUI\\Media\\Logo", -- Placeholder
-        title = "NoobTaco Config",
-        version = "v1.0.0",
+        icon = Lib.Media .. "\\Textures\\Logo.png", -- Library Logo
+        title = "|chighlight|Config Library|r Showcase",
+        version = "v1.1.0",
         description =
-        "This is a demo configuration library for NoobTacoUI. It provides a standardized way to build settings menus with a consistent look and feel.\n\nCreated by NoobTaco Development Team.",
+        "Welcome to the |chighlight|NoobTaco-Config|r showcase. This application demonstrates all available widgets, layout options, and the dynamic theming engine.\n\nUse the sidebar to explore different feature sets. This environment uses a |cinfo|temporary state buffer|r, meaning changes here will not affect your persistent addon settings.",
         links = {
-          { label = "Discord", url = "https://discord.gg/noobtaco" },
-          { label = "Patreon", url = "https://patreon.com/noobtaco" },
-          { label = "GitHub",  url = "https://github.com/noobtaco/config" },
+          { label = "Documentation", url = "https://github.com/NoobTaco/NoobTaco-Config" },
+          { label = "GitHub",        url = "https://github.com/NoobTaco/NoobTaco-Config" },
+          { label = "Discord",       url = "https://discord.gg/noobtaco" },
         }
       },
-      { type = "header", label = "Media Test" },
+      { type = "header", label = "System Overview" },
       {
-        id = "selectedSound",
-        type = "media",
-        label = "Notification Sound",
-        default = "Sound\\Interface\\RaidWarning.ogg", -- Default Sound
-        options = {
-          { label = "Raid Warning",        value = "Sound\\Interface\\RaidWarning.ogg" },
-          { label = "Level Up",            value = "Sound\\Interface\\LevelUp.ogg" },
-          { label = "Auction Window Open", value = "Sound\\Interface\\AuctionWindowOpen.ogg" },
-          { label = "Murloc",              value = "Sound\\Creature\\Murloc\\mMurlocAggroOld.ogg" },
+        type = "row",
+        children = {
+          {
+            type = "callout",
+            title = "|csuccess|Library Ready|r",
+            text =
+            "The configuration engine is fully initialized and utilizing the |chighlight|Poppins|r modern font family.",
+            buttonText = "LOG STATUS",
+            style = "success",
+            onButtonClick = function() print("Config Library: Status Nominal") end
+          },
         }
       }
     }
   }
 
-  ConfigTest.Schemas.Profiles = {
+  -- 2. INPUT ELEMENTS
+  ConfigTest.Schemas.Inputs = {
     type = "group",
     children = {
-      { type = "header",      label = "ADDON PROFILES" },
-      { type = "description", text = "Configure profiles for compatible addons. Each addon section shows import/export options and customization settings." },
+      { type = "header",      label = "Standard Input Elements" },
+      { type = "description", text = "These widgets allow for direct data entry and state manipulation using the |chighlight|Lib.State|r management system." },
 
       {
         type = "card",
-        label = "BetterBlizzFrames",
+        label = "Toggles & Binary State",
         children = {
-          { type = "description", text = "Profile content for BetterBlizzFrames would go here." },
+          { id = "test_checkbox_1", type = "checkbox",                                                                                          label = "Standard Checkbox", default = true },
+          { id = "test_checkbox_2", type = "checkbox",                                                                                          label = "Inverted Checkbox", default = false, invertValue = true },
+          { type = "description",   text = "|cinfo|Note:|r Inverted checkboxes are useful for 'Hide' style settings (Checked = False in data)." },
         }
       },
 
       {
         type = "card",
-        label = "Cooldown Manager Tweaks",
+        label = "Range & Text Selection",
         children = {
-          { type = "alert", severity = "info", text = "NOT LOADED - This addon is not currently installed." },
+          { id = "test_slider",  type = "slider",      label = "Numeric Slider",       min = 0,                max = 100, step = 1, default = 50 },
+          { id = "test_editbox", type = "editbox",     label = "Text Input Field",     default = "Sample Text" },
+          { id = "test_color",   type = "colorpicker", label = "Color Palette Swatch", default = "FFCC00" },
+        }
+      }
+    }
+  }
+
+  -- 3. SELECTORS & MEDIA
+  ConfigTest.Schemas.Selectors = {
+    type = "group",
+    children = {
+      { type = "header",      label = "Selection & Media" },
+      { type = "description", text = "Advanced components for choosing from datasets or interacting with game assets like sounds." },
+
+      {
+        type = "card",
+        label = "Dropdown Components",
+        children = {
           {
-            type = "description",
-            text =
-            "Import a pre-configured profile for Cooldown Manager Tweaks that complements the NoobTacoUI aesthetic. This profile includes optimized tracker styling and positioning."
+            id = "test_dropdown",
+            type = "dropdown",
+            label = "Generic Dropdown",
+            default = "opt1",
+            options = {
+              { label = "Option Alpha",                value = "opt1" },
+              { label = "Option Beta",                 value = "opt2" },
+              { label = "Option Gamma",                value = "opt3" },
+              { label = "|chighlight|Themed Option|r", value = "opt4" },
+            }
+          }
+        }
+      },
+
+      {
+        type = "card",
+        label = "Asset Selection",
+        children = {
+          {
+            id = "test_media",
+            type = "media",
+            label = "Sound Library Selector",
+            default = "Sound\\Interface\\RaidWarning.ogg",
+            options = {
+              { label = "Raid Warning", value = "Sound\\Interface\\RaidWarning.ogg" },
+              { label = "Level Up",     value = "Sound\\Interface\\LevelUp.ogg" },
+              { label = "Murloc",       value = "Sound\\Creature\\Murloc\\mMurlocAggroOld.ogg" },
+            }
           },
+          { type = "description", text = "The |chighlight|media|r widget includes a built-in play button for asset previewing." }
+        }
+      }
+    }
+  }
+
+  -- 4. FEEDBACK & ALERTS
+  ConfigTest.Schemas.Feedback = {
+    type = "group",
+    children = {
+      { type = "header",      label = "Feedback & Communication" },
+      { type = "description", text = "The library provides several ways to communicate status, errors, or guidance to the user." },
+
+      {
+        type = "card",
+        label = "Inline Alerts",
+        children = {
+          { type = "alert", severity = "info",    text = "|cinfo|Information:|r This is a standard informational alert." },
+          { type = "alert", severity = "success", text = "|csuccess|Success:|r The operation was completed successfully." },
+          { type = "alert", severity = "warning", text = "|cwarning|Warning:|r Please review these settings before proceeding." },
+          { type = "alert", severity = "error",   text = "|cerror|Error:|r An unexpected issue has occurred." },
+        }
+      },
+
+      { type = "header", label = "Interactive Callouts" },
+      {
+        type = "callout",
+        title = "Feature Highlight",
+        text =
+        "Callouts are |chighlight|high-impact|r banners designed to draw attention to specific actions or critical setup steps.",
+        buttonText = "EXECUTE ACTION",
+        style = "info",
+        onButtonClick = function() print("Callout Action Executed") end
+      },
+      {
+        type = "callout",
+        title = "Warning Requirement",
+        text =
+        "This callout demonstrates a |cwarning|warning state|r. It uses theme-aware coloring for both the border and the action button.",
+        buttonText = "ACKNOWLEDGE",
+        style = "warning",
+        onButtonClick = function() print("Warning Acknowledged") end
+      }
+    }
+  }
+
+  -- 5. BUTTON STYLES
+  ConfigTest.Schemas.Buttons = {
+    type = "group",
+    children = {
+      { type = "header",      label = "Interactive Components" },
+      { type = "description", text = "Showcase of all predefined button styles and custom color override capabilities." },
+
+      {
+        type = "card",
+        label = "Predefined Styles",
+        children = {
           {
-            type = "description",
-            text =
-            "|cff80ff00Instructions:|r\n1. Click the button below to copy the profile string\n2. Type |cffffcc00/cmt|r in chat to open Cooldown Manager Tweaks config\n3. Navigate to the |cffffcc00Profiles|r section..."
+            type = "row",
+            children = {
+              { type = "button", label = "Primary",   style = "primary",   width = 120, onClick = function() end },
+              { type = "button", label = "Secondary", style = "secondary", width = 120, onClick = function() end },
+            }
           },
           {
             type = "row",
             children = {
-              {
-                type = "button",
-                label = "Copy Profile String",
-                style = "primary",
-                width = 150,
-                onClick = function() print("Copied CMT Profile") end
-              },
-              {
-                type = "button",
-                label = "Get Addon Link",
-                width = 150,
-                onClick = function() print("Link: https://curseforge.com/...") end
-              }
+              { type = "button", label = "Success", style = "success", width = 120, onClick = function() end },
+              { type = "button", label = "Info",    style = "info",    width = 120, onClick = function() end },
+              { type = "button", label = "Warning", style = "warning", width = 120, onClick = function() end },
+              { type = "button", label = "Error",   style = "error",   width = 120, onClick = function() end },
             }
-          },
+          }
         }
       },
 
       {
         type = "card",
-        label = "Details! Damage Meter",
+        label = "Custom Overrides",
         children = {
-          { type = "alert",       severity = "info",                                                                               text = "NOT LOADED - This addon is not currently installed." },
-          { type = "description", text = "Profile content for Details! Damage Meter will appear here when the addon is installed." },
+          {
+            type = "button",
+            label = "Custom Color & Text Override",
+            width = 250,
+            customColors = {
+              normal = { 0.4, 0.1, 0.6, 1 }, -- Purple
+              hover  = { 0.6, 0.2, 0.8, 1 },
+              text   = { 0, 1, 1, 1 }        -- Cyan text
+            },
+            onClick = function() end
+          }
         }
-      },
-
-      {
-        type = "card",
-        label = "Platynator",
-        children = {
-          { type = "description", text = "Profile content for Platynator will appear here." },
-        }
-      },
+      }
     }
   }
 
-  ConfigTest.Schemas.Buttons = {
+  -- 6. THEME ENGINE
+  ConfigTest.Schemas.Theme = {
     type = "group",
     children = {
-      { type = "header",      label = "Button Style Variations" },
-      { type = "description", text = "This section showcases the different button styles available in the NoobTaco-Config library." },
+      { type = "header",      label = "Dynamic Theming" },
+      { type = "description", text = "The library supports live theme switching. All colors, including |chighlight|inline tokens|r, update instantly across the entire UI." },
 
-      { type = "header",      label = "Functional Styles" },
       {
-        type = "row",
+        type = "card",
+        label = "Theme Selection",
         children = {
           {
-            type = "button",
-            label = "Primary Button",
-            style = "primary",
-            width = 150,
-            onClick = function()
-              print(
-                "Primary Clicked")
-            end
-          },
-          {
-            type = "button",
-            label = "Secondary Button",
-            style = "secondary",
-            width = 150,
-            onClick = function()
-              print(
-                "Secondary Clicked")
-            end
-          },
-        }
-      },
-
-      { type = "header", label = "Semantic Alert Styles" },
-      {
-        type = "row",
-        children = {
-          {
-            type = "button",
-            label = "Success Button",
-            style = "success",
-            width = 150,
-            onClick = function()
-              print(
-                "Success Clicked")
-            end
-          },
-          {
-            type = "button",
-            label = "Info Button",
-            style = "info",
-            width = 150,
-            onClick = function()
-              print(
-                "Info Clicked")
-            end
-          },
-        }
-      },
-      {
-        type = "row",
-        children = {
-          {
-            type = "button",
-            label = "Warning Button",
-            style = "warning",
-            width = 150,
-            onClick = function()
-              print(
-                "Warning Clicked")
-            end
-          },
-          {
-            type = "button",
-            label = "Error Button",
-            style = "error",
-            width = 150,
-            onClick = function()
-              print(
-                "Error Clicked")
-            end
-          },
-        }
-      },
-
-      { type = "header", label = "Custom Overrides" },
-      {
-        type = "row",
-        children = {
-          {
-            type = "button",
-            label = "Style + Custom Text",
-            style = "primary",
-            width = 180,
-            customColors = { text = { 1, 0, 0, 1 } }, -- Red text on Gold button
-            onClick = function() print("Custom Text Clicked") end
-          },
-          {
-            type = "button",
-            label = "Fully Custom",
-            width = 180,
-            customColors = {
-              normal = { 0.5, 0, 0.5, 1 },
-              hover = { 0.7, 0, 0.7, 1 },
-              text = { 1, 1, 1, 1 }
+            id = "activeTheme",
+            type = "dropdown",
+            label = "Select Active Theme",
+            default = "NoobTaco",
+            options = {
+              { label = "NoobTaco (Standard)", value = "NoobTaco" },
+              { label = "Nord (Frost)",        value = "Nord" },
+              { label = "Catppuccin (Mocha)",  value = "Catppuccin" },
+              { label = "Legacy / Default",    value = "Default" },
             },
-            onClick = function() print("Fully Custom Clicked") end
-          },
+            onChange = function(value)
+              Lib.Theme:SetTheme(value)
+            end
+          }
         }
       },
 
-      { type = "header", label = "Truncation Test" },
+      { type = "header", label = "Token Demonstration" },
       {
-        type = "row",
+        type = "card",
+        label = "Theme Tokens in Strings",
         children = {
-          {
-            type = "button",
-            label = "This is a very long button label that should definitely truncate",
-            style = "primary",
-            width = 200,
-            onClick = function() print("Long button clicked") end
-          },
-          {
-            type = "button",
-            label = "Another long label for a small button",
-            style = "secondary",
-            width = 100,
-            onClick = function() print("Small long button clicked") end
-          },
+          { type = "description", text = "|chighlight|chighlight|r: Primary highlight color." },
+          { type = "description", text = "|cheader|cheader|r: Main accent / header color." },
+          { type = "description", text = "|cinfo|cinfo|r: Informational / Secondary blue." },
+          { type = "description", text = "|csuccess|csuccess|r: Success green." },
+          { type = "description", text = "|cwarning|cwarning|r: Warning amber." },
+          { type = "description", text = "|cerror|cerror|r: Error red." },
         }
-      },
+      }
     }
   }
 end
@@ -396,26 +261,21 @@ end
 -- INITIALIZATION
 -- ============================================================================
 function ConfigTest:Initialize()
-  local categoryName = "NoobTaco Config Test"
+  local categoryName = "Library Showcase"
 
-  -- Build schemas once
   BuildSchemas()
 
-  -- Create the Canvas Frame
   local canvas = CreateFrame("Frame", nil, UIParent)
   canvas:SetSize(800, 600)
 
-  -- Register with WoW Settings API (Dragonflight/WarWithin)
   if Settings and Settings.RegisterCanvasLayoutCategory then
     local category = Settings.RegisterCanvasLayoutCategory(canvas, categoryName)
     Settings.RegisterAddOnCategory(category)
 
-    -- Deferred first render to allow WoW layout to stabilize
     local hasRenderedOnce = false
 
     local function TryRender()
       local width = canvas:GetWidth()
-      -- Only render if width is valid and changed significantly
       if width > 10 and (not canvas.lastRenderedWidth or math.abs(canvas.lastRenderedWidth - width) > 5) then
         self:RenderContent(canvas)
         canvas.lastRenderedWidth = width
@@ -424,10 +284,7 @@ function ConfigTest:Initialize()
 
     canvas:SetScript("OnShow", function()
       if not hasRenderedOnce then
-        -- Double-pass rendering to ensure WoW layout engine has calculated dimensions
-        -- First pass: creates frames and triggers layout
         TryRender()
-        -- Second pass after WoW has done a layout tick: uses correct dimensions
         C_Timer.After(0, function()
           TryRender()
           hasRenderedOnce = true
@@ -444,57 +301,62 @@ end
 function ConfigTest:RenderContent(parent)
   local Schemas = ConfigTest.Schemas
 
-  -- Initialize State with Dummy DB (idempotent)
-  local DummyDB = {
-    enableMinimap = true,
-    globalScale = 1.0,
-    accentColor = "00A8FF",
+  -- Initialize State with Showcase DB
+  local ShowcaseDB = {
+    test_checkbox_1 = true,
+    test_checkbox_2 = false,
+    test_slider = 50,
+    test_editbox = "Config Lib v1.0",
+    test_color = "00A8FF",
+    test_dropdown = "opt1",
+    test_media = "Sound\\Interface\\RaidWarning.ogg",
     activeTheme = "NoobTaco",
-    enableToasts = true,
-    apiKey = "SECRET_KEY",
-    debugLevel = "WARN",
-    selectedSound = "Sound\\Interface\\RaidWarning.ogg"
   }
-  Lib.State:Initialize(DummyDB)
+  Lib.State:Initialize(ShowcaseDB)
 
-  -- Layout Initialization (only once)
+  -- Layout Initialization
   local layout = parent.Layout
   if not layout then
     layout = Lib.Layout:CreateTwoColumnLayout(parent)
     parent.Layout = layout
     layout:SetScale(1.0)
 
-    -- Populate Sidebar using PERSISTENT schema references
-    Lib.Layout:AddSidebarButton(layout, "about", "About", function()
+    -- Sidebar Configuration
+    Lib.Layout:AddSidebarButton(layout, "about", "Overview", function()
       Lib.State:SetValue("lastSection", "about")
       Lib.Renderer:Render(Schemas.About, layout)
     end)
-    Lib.Layout:AddSidebarButton(layout, "general", "General Settings", function()
-      Lib.State:SetValue("lastSection", "general")
-      Lib.Renderer:Render(Schemas.General, layout)
+    Lib.Layout:AddSidebarButton(layout, "inputs", "Inputs", function()
+      Lib.State:SetValue("lastSection", "inputs")
+      Lib.Renderer:Render(Schemas.Inputs, layout)
     end)
-    Lib.Layout:AddSidebarButton(layout, "profiles", "Profiles", function()
-      Lib.State:SetValue("lastSection", "profiles")
-      Lib.Renderer:Render(Schemas.Profiles, layout)
+    Lib.Layout:AddSidebarButton(layout, "selectors", "Selectors", function()
+      Lib.State:SetValue("lastSection", "selectors")
+      Lib.Renderer:Render(Schemas.Selectors, layout)
     end)
-    Lib.Layout:AddSidebarButton(layout, "buttons", "Experiments", function()
+    Lib.Layout:AddSidebarButton(layout, "buttons", "Buttons", function()
       Lib.State:SetValue("lastSection", "buttons")
       Lib.Renderer:Render(Schemas.Buttons, layout)
     end)
-    Lib.Layout:AddSidebarButton(layout, "advanced", "Advanced", function()
-      Lib.State:SetValue("lastSection", "advanced")
-      Lib.Renderer:Render(Schemas.Advanced, layout)
+    Lib.Layout:AddSidebarButton(layout, "feedback", "Feedback", function()
+      Lib.State:SetValue("lastSection", "feedback")
+      Lib.Renderer:Render(Schemas.Feedback, layout)
+    end)
+    Lib.Layout:AddSidebarButton(layout, "theme", "Theme Engine", function()
+      Lib.State:SetValue("lastSection", "theme")
+      Lib.Renderer:Render(Schemas.Theme, layout)
     end)
   end
 
-  -- Initial Render (Restore last section)
+  -- Initial Render
   local lastSection = Lib.State:GetValue("lastSection") or "about"
   local sectionSchemas = {
-    about = Schemas.About,
-    general = Schemas.General,
-    profiles = Schemas.Profiles,
-    advanced = Schemas.Advanced,
-    buttons = Schemas.Buttons
+    about     = Schemas.About,
+    inputs    = Schemas.Inputs,
+    selectors = Schemas.Selectors,
+    buttons   = Schemas.Buttons,
+    feedback  = Schemas.Feedback,
+    theme     = Schemas.Theme
   }
 
   Lib.Layout:SelectSidebarButton(layout, lastSection)

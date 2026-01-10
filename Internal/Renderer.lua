@@ -727,6 +727,7 @@ function ConfigRenderer:Render(schema, container)
 
   local cursor = {
     x = 10,
+    startX = 10,
     y = -10,
     rowHeight = 0,
     maxWidth = width - 20
@@ -1023,7 +1024,7 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
     -- Calculate content height by rendering children into content frame
     local contentHeight = 10 -- Initial padding
     if item.children then
-      local childCursor = { x = 0, y = 0, rowHeight = 0, maxWidth = cursor.maxWidth - 20 }
+      local childCursor = { x = 0, startX = 0, y = 0, rowHeight = 0, maxWidth = cursor.maxWidth - 20 }
       for _, child in ipairs(item.children) do
         self:RenderItem(child, frame.Content, childCursor)
       end
@@ -1059,21 +1060,21 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
   elseif item.type == "row" then
     -- Handle Row Layout
     -- Force new row if we are not at the start
-    if cursor.x > 10 then
-      cursor.x = 10
+    if cursor.x > cursor.startX then
+      cursor.x = cursor.startX
       cursor.y = cursor.y - cursor.rowHeight - padding
       cursor.rowHeight = 0
     end
 
     if item.children then
-      local rowCursor = { x = cursor.x, y = cursor.y, rowHeight = 0, maxWidth = cursor.maxWidth }
+      local rowCursor = { x = cursor.x, startX = cursor.startX, y = cursor.y, rowHeight = 0, maxWidth = cursor.maxWidth }
       for _, child in ipairs(item.children) do
         self:RenderItem(child, parent, rowCursor)
       end
       -- Update main cursor y to account for the row's total height consumption
       cursor.y = rowCursor.y - rowCursor.rowHeight - 10 -- Add padding
       cursor.rowHeight = 0
-      cursor.x = 10                                     -- Reset X for next main item
+      cursor.x = cursor.startX                          -- Reset X for next main item
 
       -- Hide the row frame itself if it was retrieved, as it's just a layout container
       if frame then frame:Hide() end
@@ -1246,48 +1247,55 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
     end
   end
 
-  -- Measure effective width for layout
   -- Measure effective width/height for layout
   local frameWidth, frameHeight = frame:GetSize()
   local effectiveWidth = frameWidth
   local effectiveHeight = frameHeight
+  local topHeight = 0
+  local bottomHeight = 0
 
+  -- 1. Account for side labels (Checkbox, ColorPicker)
   if item.type == "checkbox" and frame.Text then
     local textWidth = frame.Text:GetStringWidth() or 100
     if textWidth == 0 then textWidth = 100 end -- Fallback
     effectiveWidth = frameWidth + textWidth + 5
-  elseif item.type == "slider" then
-    -- Sliders have labels outside their frame bounds
-    local topHeight = 0
-    local bottomHeight = 0
+  elseif item.type == "colorpicker" and frame.Label then
+    local textWidth = frame.Label:GetStringWidth() or 100
+    if textWidth == 0 then textWidth = 100 end -- Fallback
+    effectiveWidth = frameWidth + textWidth + 10
+  end
 
-    if frame.Text and frame.Text:GetText() then
-      topHeight = frame.Text:GetStringHeight()
+  -- 2. Account for top labels (Slider, EditBox, Dropdown, Media)
+  if item.type == "slider" or item.type == "editbox" or item.type == "dropdown" or item.type == "media" then
+    -- For Sliders, the label is 'frame.Text'. For others, it's 'frame.Label'.
+    local label = (item.type == "slider") and frame.Text or frame.Label
+    if label and label:GetText() and label:GetText() ~= "" then
+      topHeight = label:GetStringHeight()
       if topHeight == 0 then topHeight = 14 end -- Fallback for initial load
-      topHeight = topHeight + 5
+      topHeight = topHeight + 5                 -- Fixed padding between label and frame
     end
 
-    if (frame.Low and frame.Low:GetText()) or (frame.High and frame.High:GetText()) then
-      bottomHeight = 14 -- Approx for small font
+    if item.type == "slider" then
+      if (frame.Low and frame.Low:GetText()) or (frame.High and frame.High:GetText()) then
+        bottomHeight = 14 -- Approx for small font
+      end
     end
 
     effectiveHeight = frameHeight + topHeight + bottomHeight
   end
 
-  if cursor.x + effectiveWidth > cursor.maxWidth and cursor.x > 10 then
+  if cursor.x > cursor.startX and cursor.x + effectiveWidth > cursor.maxWidth then
     -- New Row
-    cursor.x = 10
+    cursor.x = cursor.startX
     cursor.y = cursor.y - cursor.rowHeight - padding
     cursor.rowHeight = 0
   end
 
   frame:ClearAllPoints()
 
-  -- Calculate Top Offset for Sliders (applies to PixelUtil too)
-  local yOffset = 0
-  if item.type == "slider" and frame.Text and frame.Text:GetText() then
-    yOffset = -(frame.Text:GetStringHeight() + 5)
-  end
+  -- Apply position with offset for top labels
+  -- This ensures the label starts at the current cursor.y
+  local yOffset = -topHeight
 
   if PixelUtil then
     PixelUtil.SetPoint(frame, "TOPLEFT", parent, "TOPLEFT", cursor.x, cursor.y + yOffset)

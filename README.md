@@ -27,13 +27,16 @@ This library provides a way to generate WoW Interface Options panels dynamically
   - **Layout.lua**: Handles frame structure and navigation.
   - **Renderer.lua**: The core engine that parses schemas and instantiates UI widgets.
 - **Themes/Theme.lua**: Defines color palettes, fonts, and styling factories.
-- **Media/**: Icons and Poppins fonts.
+- **Media/**:
+  - **Fonts/**: Poppins fonts.
+  - **Textures/**: Library UI assets (Logo, etc.).
 - **LibStub.lua**: Standard library versioning helper.
 
 > **Note**: This library is registered with **LibStub** as `NoobTaco-Config-1.0`. 
 
 ## Quick Reference
-- [Configuration Cheat Sheet](CHEAT_SHEET.md) - Full list of all available containers and elements.
+- [Configuration Cheat Sheet](docs/CHEAT_SHEET.md) - Full list of all available containers and elements.
+- [API Reference](docs/API_REFERENCE.md) - Technical documentation for library usage.
 
 ## Usage
 
