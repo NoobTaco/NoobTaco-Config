@@ -8,6 +8,8 @@
 
 ### Fixed
 - **State Initialization**: Simplified `State:Initialize` and `State:Revert` to leverage the new deep-access logic and prevent redundant table copies.
+- **Card Theming**: Fixed card headers displaying raw tokens by properly applying `Theme:ProcessText`.
+- **Media Selection Theming**: Applied theme token processing to media dropdown item labels for consistent styling.
 
 ## [1.1.1] - 2026-01-09
 ### Added

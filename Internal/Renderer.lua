@@ -409,11 +409,41 @@ local function GetFrame(frameType, parent)
     elseif frameType == "card" then
       frame.UpdateTheme = function(self)
         Theme:ApplyFont(self.Title, "Bold", 13)
-        local r, g, b = Theme:GetColor("button_normal")
-        self.HeaderBg:SetColorTexture(r, g, b, 1)
-        local br, b_g, bb = Theme:GetColor("border")
-        self:SetBackdropBorderColor(br, b_g, bb, 1)
-        self:SetBackdropColor(0.1, 0.1, 0.12, 0.8)
+
+        -- Header Background (Integrated with button themes)
+        local hr, hg, hb, ha = Theme:GetColor("button_normal")
+        self.HeaderBg:SetColorTexture(hr, hg, hb, ha)
+
+        -- Border Color (Theme Accent)
+        local br, bg, bb, ba = Theme:GetColor("border")
+        self:SetBackdropBorderColor(br, bg, bb, ba)
+
+        -- Backdrop Color (Theme Background with slight lift)
+        local bkr, bkg, bkb, bka = Theme:GetColor("background")
+        self:SetBackdropColor(bkr, bkg, bkb, math.min(bka + 0.1, 1))
+
+        -- Title Color (Theme Header color)
+        local tr, tg, tb = Theme:GetColor("header")
+        self.Title:SetTextColor(tr, tg, tb)
+
+        -- Update processed text with theme tokens
+        if self.rawText then
+          self.Title:SetText(Theme:ProcessText(self.rawText))
+        end
+      end
+      Theme:RegisterT(frame)
+    elseif frameType == "about" then
+      frame.UpdateTheme = function(self)
+        Theme:ApplyFont(self.Title, "Bold", 24)
+        Theme:ApplyFont(self.Version, "Normal", 12)
+        Theme:ApplyFont(self.Description, "Normal", 13)
+
+        self.Title:SetTextColor(Theme:GetColor("header"))
+        self.Version:SetTextColor(0.6, 0.6, 0.6)
+
+        if self.rawTitle then self.Title:SetText(Theme:ProcessText(self.rawTitle)) end
+        if self.rawVersion then self.Version:SetText(Theme:ProcessText(self.rawVersion)) end
+        if self.rawDescription then self.Description:SetText(Theme:ProcessText(self.rawDescription)) end
       end
       Theme:RegisterT(frame)
     elseif frameType == "callout" then
@@ -439,14 +469,6 @@ local function GetFrame(frameType, parent)
         -- Button
         self.Button.customColors = Theme:GetButtonColorsForAlert(severity)
         Theme:UpdateButtonState(self.Button)
-      end
-      Theme:RegisterT(frame)
-    elseif frameType == "about" then
-      frame.UpdateTheme = function(self)
-        Theme:ApplyFont(self.Title, "Bold", 24)
-        Theme:ApplyFont(self.Version, "Normal", 12)
-        Theme:ApplyFont(self.Description, "Normal", 12)
-        self.Title:SetTextColor(Theme:GetColor("header"))
       end
       Theme:RegisterT(frame)
     elseif frameType == "alert" then
@@ -864,7 +886,7 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
           local btn = GetFrame("dropdown_item", popupContent)
           btn:SetSize(frame.Popup:GetWidth() - 25, itemHeight)
           btn:SetPoint("TOPLEFT", 5, yOff)
-          btn.Text:SetText(opt.label)
+          btn.Text:SetText(Theme:ProcessText(opt.label))
 
           btn:SetScript("OnClick", function()
             State:SetValue(item.id, opt.value)
@@ -906,7 +928,7 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
           local btn = GetFrame("media_item", popupContent)
           btn:SetSize(frame.Popup:GetWidth() - 25, itemHeight)
           btn:SetPoint("TOPLEFT", 5, yOff)
-          btn.Text:SetText(opt.label)
+          btn.Text:SetText(Theme:ProcessText(opt.label))
 
           -- Select Action
           btn:SetScript("OnClick", function()
@@ -995,7 +1017,8 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
   elseif item.type == "header" then
     if PixelUtil then PixelUtil.SetSize(frame, cursor.maxWidth, 30) else frame:SetSize(cursor.maxWidth, 30) end
   elseif item.type == "card" then
-    frame.Title:SetText(item.label or "")
+    frame.rawText = item.label
+    frame.Title:SetText(Theme:ProcessText(item.label or ""))
 
     -- Calculate content height by rendering children into content frame
     local contentHeight = 10 -- Initial padding
