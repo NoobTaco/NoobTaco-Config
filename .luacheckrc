@@ -20,7 +20,8 @@ read_globals = {
     "wipe",
     "strtrim",
     "strmatch",
-    "GetBuildInfo"
+    "GetBuildInfo",
+    "LibStub"
 }
 
 -- Exclude test files and installed rock dependencies

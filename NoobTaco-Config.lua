@@ -4,7 +4,7 @@
 ]]
 
 local MAJOR, MINOR = "NoobTaco-Config-1.0", 1
-local Lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
+local Lib, _ = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not Lib then return end
 
@@ -27,7 +27,7 @@ end
 Lib.Media = mediaPath
 
 -- Public API
-function Lib:Register(projectName, configSchema, dbTable)
+function Lib:Register(_, _, dbTable)
     self.State:Initialize(dbTable)
     -- Registration logic...
 end
