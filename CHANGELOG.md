@@ -1,39 +1,27 @@
 # Changelog
 
-## [1.1.3] - 2026-01-10
+## [1.2.0] - 2026-01-10
 ### Added
 - **README Overhaul**: Completely redesigned the `README.md` with a more visual, structural, and professional layout geared towards GitHub, CurseForge, and Wago.
 - **Embedded Screenshots**: Integrated high-quality screenshots directly into the repository and documentation to showcase all library widgets and themes.
 - **Logo Asset Management**: Relocated the library logo to `Media/Textures/Logo.png` and updated the `.toc` file to follow Blizzard's asset path requirements.
-
-### Changed
-- **Asset Resolution**: `ConfigTest.lua` now utilizes the `Lib.Media` helper for more robust asset pathing, ensuring correct icon rendering in different project environments.
-- **PNG Support**: Standardized on `.png` extensions for external assets to ensure proper rendering via `SetTexture` in modern WoW clients.
-
-### Fixed
-- **Layout Alignment**: Refactored the internal rendering engine to generically calculate label dimensions. This resolves alignment issues where widgets like `editbox`, `dropdown`, and `media` were shifted due to uncalculated top label offsets.
-- **Side Label Measurements**: Improved width calculations for widgets with side labels (`checkbox`, `colorpicker`) to prevent layout clumping.
-
-## [1.1.2] - 2026-01-09
-### Added
 - **Nested Path Support**: `Lib.State` now supports dot-notation for IDs (e.g., `GeneralSettings.hide`), allowing settings to be mapped directly to nested database tables.
 - **Checkbox Inversion**: Added `invertValue` property to checkboxes, useful for "hide" style settings where the checkbox represents the opposite of the boolean value.
 - **Callback Support**: Added `onChange` callback support for `checkbox` and `slider` widgets to allow for real-time reactions and feedback.
-
-### Fixed
-- **State Initialization**: Simplified `State:Initialize` and `State:Revert` to leverage the new deep-access logic and prevent redundant table copies.
-- **Card Theming**: Fixed card headers displaying raw tokens by properly applying `Theme:ProcessText`.
-- **Media Selection Theming**: Applied theme token processing to media dropdown item labels for consistent styling.
-
-## [1.1.1] - 2026-01-09
-### Added
 - **Theme Color Tokens**: Enabled the use of theme-defined color tokens (e.g., `|chighlight|`, `|cheader|`, `|ctext|`) within strings for headers, descriptions, callouts, and alerts.
 - **Dynamic Hex Conversion**: New `Theme:GetColorHex(key)` and `Theme:ProcessText(text)` methods to handle live conversion of theme colors to WoW-compatible hex format.
 
 ### Changed
+- **Asset Resolution**: `ConfigTest.lua` now utilizes the `Lib.Media` helper for more robust asset pathing, ensuring correct icon rendering in different project environments.
+- **PNG Support**: Standardized on `.png` extensions for external assets to ensure proper rendering via `SetTexture` in modern WoW clients.
 - **Renderer Optimization**: widgets now store `rawText` to allow for re-processing with new theme colors when the active theme is changed, ensuring inline colors remain accurate.
 
 ### Fixed
+- **Layout Alignment**: Refactored the internal rendering engine to generically calculate label dimensions. This resolves alignment issues where widgets like `editbox`, `dropdown`, and `media` were shifted due to uncalculated top label offsets.
+- **Side Label Measurements**: Improved width calculations for widgets with side labels (`checkbox`, `colorpicker`) to prevent layout clumping.
+- **State Initialization**: Simplified `State:Initialize` and `State:Revert` to leverage the new deep-access logic and prevent redundant table copies.
+- **Card Theming**: Fixed card headers displaying raw tokens by properly applying `Theme:ProcessText`.
+- **Media Selection Theming**: Applied theme token processing to media dropdown item labels for consistent styling.
 - **Redundant Rendering**: Removed redundant `SetText` calls in `Renderer.lua` that were bypassing the theme processing logic and causing tokens to display as raw strings.
 - **Rounding Accuracy**: Improved hex color conversion rounding in `Theme:GetColorHex` to prevent slight color offsets in rendered text.
 
