@@ -8,10 +8,10 @@
 
 | Overview | Theme Support |
 | :---: | :---: |
-| ![Welcome](./Media/Screenshots/noobtaco-config-welcome-ss.png) | ![Themes](./Media/Screenshots/noobtaco-config-theme-catppuccin-ss.png) |
+| ![Welcome](https://raw.githubusercontent.com/NoobTaco/NoobTaco-Config/main/Media/Screenshots/noobtaco-config-welcome-ss.png) | ![Themes](https://raw.githubusercontent.com/NoobTaco/NoobTaco-Config/main/Media/Screenshots/noobtaco-config-theme-catppuccin-ss.png) |
 
 > [!TIP]
-> Use the [Library Showcase](Tests/ConfigTest.lua) in-game to see the dynamic theming and all widgets in action.
+> Use the [Library Showcase](https://github.com/NoobTaco/NoobTaco-Config/blob/main/Tests/ConfigTest.lua) in-game to see the dynamic theming and all widgets in action.
 
 ## ✨ Features
 
@@ -73,19 +73,19 @@ Lib.Renderer:Render(schema, myPanel)
 
 | Inputs & Widgets | Buttons | Feedback & Alerts |
 | :---: | :---: | :---: |
-| ![Inputs](./Media/Screenshots/noobtaco-config-inputs-ss.png) | ![Buttons](./Media/Screenshots/noobtaco-config-button-ss.png) | ![Feedback](./Media/Screenshots/noobtaco-config-feedback-ss.png) |
+| ![Inputs](https://raw.githubusercontent.com/NoobTaco/NoobTaco-Config/main/Media/Screenshots/noobtaco-config-inputs-ss.png) | ![Buttons](https://raw.githubusercontent.com/NoobTaco/NoobTaco-Config/main/Media/Screenshots/noobtaco-config-button-ss.png) | ![Feedback](https://raw.githubusercontent.com/NoobTaco/NoobTaco-Config/main/Media/Screenshots/noobtaco-config-feedback-ss.png) |
 
 ## 🧪 Theme Engine
 The library supports instant theme switching. All colors, including inline tokens, update in real-time.
 
 | NoobTaco (Standard) | Nord (Frost) | Catppuccin (Mocha) |
 | :---: | :---: | :---: |
-| ![NoobTaco](./Media/Screenshots/noobtaco-config-theme-noobtaco-ss.png) | ![Nord](./Media/Screenshots/noobtaco-config-theme-nord-ss.png) | ![Catppuccin](./Media/Screenshots/noobtaco-config-theme-catppuccin-ss.png) |
+| ![NoobTaco](https://raw.githubusercontent.com/NoobTaco/NoobTaco-Config/main/Media/Screenshots/noobtaco-config-theme-noobtaco-ss.png) | ![Nord](https://raw.githubusercontent.com/NoobTaco/NoobTaco-Config/main/Media/Screenshots/noobtaco-config-theme-nord-ss.png) | ![Catppuccin](https://raw.githubusercontent.com/NoobTaco/NoobTaco-Config/main/Media/Screenshots/noobtaco-config-theme-catppuccin-ss.png) |
 
 ## 📚 Documentation
 
-- [Configuration Cheat Sheet](docs/CHEAT_SHEET.md) - All available containers and elements.
-- [API Reference](docs/API_REFERENCE.md) - Detailed technical documentation.
+- [Configuration Cheat Sheet](https://github.com/NoobTaco/NoobTaco-Config/blob/main/docs/CHEAT_SHEET.md) - All available containers and elements.
+- [API Reference](https://github.com/NoobTaco/NoobTaco-Config/blob/main/docs/API_REFERENCE.md) - Detailed technical documentation.
 
 ## 📄 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
