@@ -12,6 +12,8 @@ This library provides a way to generate WoW Interface Options panels dynamically
 - **State Management**: Transactional state with commit/revert capabilities.
 - **Theming**: Built-in support for switching color themes (NoobTaco, Nord, Catppuccin) and fonts (Poppins).
 - **Inline Color Tokens**: Use `|ctoken|` (e.g., `|chighlight|`) in strings to dynamically apply theme colors to text in headers, descriptions, and alerts.
+- **Nested Data Support**: Support for dot-notation in widget IDs (e.g., `GeneralSettings.hide`) to map directly to nested SavedVariables structures.
+- **Checkbox Inversion**: `invertValue` property for checkboxes to support "hide" style settings.
 - **Custom Rendering**: "Pixel-perfect" rendering for all interactive components with a consistent 1px border aesthetic.
 - **Embedded vs Standalone**: Automatic path detection for assets when embedded in other addons.
 

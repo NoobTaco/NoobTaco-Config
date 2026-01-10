@@ -781,9 +781,19 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
   end
 
   if item.type == "checkbox" then
-    frame:SetChecked(currentVal == true)
+    local checked = (currentVal == true)
+    if item.invertValue then
+      checked = (currentVal == false)
+    end
+    frame:SetChecked(checked)
+
     frame:SetScript("OnClick", function(chk)
-      State:SetValue(item.id, chk:GetChecked())
+      local newVal = chk:GetChecked()
+      if item.invertValue then
+        newVal = not newVal
+      end
+      State:SetValue(item.id, newVal)
+      if item.onChange then item.onChange(newVal) end
     end)
   elseif item.type == "slider" then
     frame:SetMinMaxValues(item.min or 0, item.max or 100)
@@ -808,6 +818,7 @@ function ConfigRenderer:RenderItem(item, parent, cursor)
     frame:SetScript("OnValueChanged", function(_, value)
       State:SetValue(item.id, value)
       UpdateValueText(value)
+      if item.onChange then item.onChange(value) end
     end)
     -- Labels for slider
     if frame.Low then

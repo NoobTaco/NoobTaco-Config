@@ -35,12 +35,12 @@ Schemas are tables defining your UI components.
 | `group` | `children` (table) |
 | `header` | `label` |
 | `description`| `text` |
-| `checkbox` | `id`, `label`, `default` |
-| `slider` | `id`, `label`, `min`, `max`, `step`, `default` |
-| `dropdown` | `id`, `label`, `options` ({label, value}) |
-| `media` | `id`, `label`, `options` (sound paths) |
+| `checkbox` | `id`, `label`, `default`, `invertValue`, `onChange` |
+| `slider` | `id`, `label`, `min`, `max`, `step`, `default`, `onChange` |
+| `dropdown` | `id`, `label`, `options` ({label, value}), `onChange` |
+| `media` | `id`, `label`, `options` (sound paths), `onChange` |
 | `button` | `label`, `onClick`, `style`, `customColors` |
-| `callout` | `title`, `text`, `buttonText`, `style` ("warning", "error", "success", "info") |
+| `callout` | `title`, `text`, `buttonText`, `style` ("warning", "error", "success", "info"), `onButtonClick` |
 | `card` | `label`, `children` |
 | `about` | `icon`, `title`, `version`, `description`, `links` ({label, url}) |
 | `expandable` | `label`, `children` |

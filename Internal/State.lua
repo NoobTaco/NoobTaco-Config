@@ -6,12 +6,56 @@ ConfigState.TempConfig = {}
 ConfigState.IsDirty = false
 ConfigState.OnDirtyChanged = nil -- Callback function
 
+-- Helper to get path from key
+local function GetPath(key)
+  local path = {}
+  for part in string.gmatch(key, "[^.]+") do
+    table.insert(path, part)
+  end
+  return path
+end
+
+-- Helper to resolve deep value from table
+local function GetDeepValue(tbl, key)
+  if not tbl then return nil end
+  if not string.find(key, "%.") then return tbl[key] end
+
+  local current = tbl
+  local path = GetPath(key)
+  for i = 1, #path do
+    if type(current) ~= "table" then return nil end
+    current = current[path[i]]
+  end
+  return current
+end
+
+-- Helper to set deep value in table
+local function SetDeepValue(tbl, key, value)
+  if not tbl then return end
+  if not string.find(key, "%.") then
+    tbl[key] = value
+    return
+  end
+
+  local current = tbl
+  local path = GetPath(key)
+  for i = 1, #path - 1 do
+    local part = path[i]
+    if type(current[part]) ~= "table" then
+      current[part] = {}
+    end
+    current = current[part]
+  end
+  current[path[#path]] = value
+end
+
 function ConfigState:Initialize(dbTable)
   self.ActiveDB = dbTable
   self.TempConfig = {}
   self.IsDirty = false
 
-  -- Deep copy ActiveDB to TempConfig
+  -- Deep copy ActiveDB to TempConfig is simplified here.
+  -- We just copy top-level keys. Nested paths will still be handled via dot notation.
   self:Revert()
 end
 
@@ -19,24 +63,14 @@ function ConfigState:SetValue(key, value)
   if not self.ActiveDB then return end
 
   self.TempConfig[key] = value
-
-  -- Check against ActiveDB to determine dirty state
-  -- Simple comparison for now, might need deep compare for tables
-
-  -- We need to check GLOBAL dirty state, not just this key
-  -- This is a simplified check. Ideally iterate all keys if needed.
-  -- For performance, we can just assume if ANY set happens and it's different, we might be dirty.
-  -- But if we revert a single value back to original, we might still be dirty from others.
-  -- Let's just do a full check or track dirty count?
-
   self:CheckDirtyState()
 end
 
 function ConfigState:GetValue(key)
-  if self.TempConfig then
+  if self.TempConfig and self.TempConfig[key] ~= nil then
     return self.TempConfig[key]
   end
-  return self.ActiveDB and self.ActiveDB[key]
+  return GetDeepValue(self.ActiveDB, key)
 end
 
 function ConfigState:CheckDirtyState()
@@ -44,7 +78,7 @@ function ConfigState:CheckDirtyState()
   self.IsDirty = false
 
   for k, v in pairs(self.TempConfig) do
-    if self.ActiveDB[k] ~= v then
+    if GetDeepValue(self.ActiveDB, k) ~= v then
       self.IsDirty = true
       break
     end
@@ -59,7 +93,7 @@ function ConfigState:Commit()
   if not self.ActiveDB then return end
 
   for k, v in pairs(self.TempConfig) do
-    self.ActiveDB[k] = v
+    SetDeepValue(self.ActiveDB, k, v)
   end
 
   self.IsDirty = false
@@ -77,11 +111,7 @@ function ConfigState:Revert()
   -- Wipe Temp
   wipe(self.TempConfig)
 
-  -- Copy Active -> Temp
-  for k, v in pairs(self.ActiveDB) do
-    self.TempConfig[k] = v
-  end
-
+  -- We don't need to copy everything because GetValue handles fallback to ActiveDB
   self.IsDirty = false
   if self.OnDirtyChanged then self.OnDirtyChanged(false) end
 end

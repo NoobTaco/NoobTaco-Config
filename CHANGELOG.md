@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.1.2] - 2026-01-09
+### Added
+- **Nested Path Support**: `Lib.State` now supports dot-notation for IDs (e.g., `GeneralSettings.hide`), allowing settings to be mapped directly to nested database tables.
+- **Checkbox Inversion**: Added `invertValue` property to checkboxes, useful for "hide" style settings where the checkbox represents the opposite of the boolean value.
+- **Callback Support**: Added `onChange` callback support for `checkbox` and `slider` widgets to allow for real-time reactions and feedback.
+
+### Fixed
+- **State Initialization**: Simplified `State:Initialize` and `State:Revert` to leverage the new deep-access logic and prevent redundant table copies.
+
 ## [1.1.1] - 2026-01-09
 ### Added
 - **Theme Color Tokens**: Enabled the use of theme-defined color tokens (e.g., `|chighlight|`, `|cheader|`, `|ctext|`) within strings for headers, descriptions, callouts, and alerts.
