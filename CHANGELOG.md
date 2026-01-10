@@ -2,6 +2,13 @@
 
 ## [1.2.0] - 2026-01-10
 ### Added
+- **Load Hardening:** Implemented a "Gatekeeper" flag (`NOOBTACO_CONFIG_SHOULD_LOAD`) to prevent older versions of the library (embedded in other addons) from overwriting newer, active versions.
+
+### Fixed
+- **Checkbox Sizing:** Fixed a regression where `checkbox` and `colorpicker` widgets would stretch to fill the column width instead of maintaining their fixed 30x30 visual size.
+
+## [1.2.0] - 2026-01-10
+### Added
 - **README Overhaul**: Completely redesigned the `README.md` with a more visual, structural, and professional layout geared towards GitHub, CurseForge, and Wago.
 - **Embedded Screenshots**: Integrated high-quality screenshots directly into the repository and documentation to showcase all library widgets and themes.
 - **Logo Asset Management**: Relocated the library logo to `Media/Textures/Logo.png` and updated the `.toc` file to follow Blizzard's asset path requirements.
