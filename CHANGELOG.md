@@ -1,8 +1,11 @@
 # Changelog
 
-## [Unreleased]
+## [1.3.0] - 2026-01-11
 ### Changed
 - **Branding**: Updated the `NoobTaco` theme colors to the official "NoobTaco Tech Brand Identity" palette (Burnt Sienna, Charcoal Navy, Golden Hour).
+
+### Fixed
+- **ProcessText Return Value**: Forced a single return value from `Theme:ProcessText` to prevent trailing digits (extra return values) from being appended to print output.
 
 
 ## [1.2.1] - 2026-01-10
