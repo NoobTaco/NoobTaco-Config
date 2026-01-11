@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+### Changed
+- **Branding**: Updated the `NoobTaco` theme colors to the official "NoobTaco Tech Brand Identity" palette (Burnt Sienna, Charcoal Navy, Golden Hour).
+
+
 ## [1.2.1] - 2026-01-10
 ### Fixed
 - **Media Widget onChange**: Added missing `onChange` callback support when selecting items from the media dropdown.
