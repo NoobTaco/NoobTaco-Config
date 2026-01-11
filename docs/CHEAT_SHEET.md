@@ -151,15 +151,15 @@ You can use theme-aware color tokens within any string property (e.g., `label`, 
 ### Available Tokens
 | Token | Description | Color Context |
 | :--- | :--- | :--- |
-| `|cheader|` | The primary accent/header color. | Often Gold or Bright White. |
-| `|chighlight|`| The primary theme highlight color. | Burnt Sienna (NoobTaco), Blue (Nord), etc. |
-| `|ctext|` | The default body text color. | Usually Cloud White or light grey. |
-| `|csuccess|` | Success/Positive color. | Green. |
-| `|cwarning|` | Warning/Caution color. | Orange/Amber. |
-| `|cerror|` | Error/Danger color. | Red. |
-| `|cinfo|` | Informational color. | Blue/Light Blue. |
-| `|cborder|` | The theme's border color. | |
-| `|cbackground|`| The theme's background color. | |
+| `\|cheader\|` | The primary accent/header color. | Often Gold or Bright White. |
+| `\|chighlight\|`| The primary theme highlight color. | Burnt Sienna (NoobTaco), Blue (Nord), etc. |
+| `\|ctext\|` | The default body text color. | Usually Cloud White or light grey. |
+| `\|csuccess\|` | Success/Positive color. | Green. |
+| `\|cwarning\|` | Warning/Caution color. | Orange/Amber. |
+| `\|cerror\|` | Error/Danger color. | Red. |
+| `\|cinfo\|` | Informational color. | Blue/Light Blue. |
+| `\|cborder\|` | The theme's border color. | |
+| `\|cbackground\|`| The theme's background color. | |
 
 ### Example Usage
 ```lua
