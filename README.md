@@ -88,4 +88,4 @@ The library supports instant theme switching. All colors, including inline token
 - [API Reference](https://github.com/NoobTaco/NoobTaco-Config/blob/main/docs/API_REFERENCE.md) - Detailed technical documentation.
 
 ## 📄 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the GPL-3.0-or-later License - see the [LICENSE](LICENSE) file for details.

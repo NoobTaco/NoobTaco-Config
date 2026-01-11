@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.3.1] - 2026-01-11
+### Changed
+- **License**: Fixed license mismatch in `README.md` (updated from MIT to GPL-3.0-or-later).
+
 ## [1.3.0] - 2026-01-11
 ### Changed
 - **Branding**: Updated the `NoobTaco` theme colors to the official "NoobTaco Tech Brand Identity" palette (Burnt Sienna, Charcoal Navy, Golden Hour).
