@@ -48,7 +48,11 @@ local schema = {
             version = "1.0.0",
             description = "A powerful configuration suite.",
             links = {
-                { label = "GitHub", url = "https://github.com/..." }
+                { 
+                    label = "GitHub", 
+                    url = "https://github.com/...",
+                    onClick = function() print("Custom Click!") end
+                }
             }
         },
         {

@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.3.2] - 2026-01-11
+### Added
+- **About Widget Link Callbacks**: Added support for custom `onClick` callbacks in the `about` widget `links` table. This allows developers to override default link behavior with custom Lua logic (e.g., showing a copy-paste dialog).
+
 ## [1.3.1] - 2026-01-11
 ### Changed
 - **License**: Fixed license mismatch in `README.md` (updated from MIT to GPL-3.0-or-later).

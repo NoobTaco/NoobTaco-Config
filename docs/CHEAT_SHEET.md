@@ -32,7 +32,7 @@ A specialized container for addon information.
   - `title`: Addon title.
   - `version`: Version string.
   - `description`: Multi-line description text.
-  - `links`: Table of `{ label = "Name", url = "URL" }`.
+  - `links`: Table of `{ label = "Name", url = "URL", onClick = function() ... end }`.
 
 ---
 
