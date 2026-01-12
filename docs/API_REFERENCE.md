@@ -90,5 +90,5 @@ Use the format `|ctoken|` where `token` is a valid theme key.
 Use `Lib.Media` to get the base path for library assets. This ensures correct paths whether the library is standalone or embedded.
 
 ```lua
-local fontPath = Lib.Media .. "\\Fonts\\Poppins-Regular.ttf"
+local fontPath = Lib.Media .. "\\Fonts\\Poppins-Medium.ttf"
 ```

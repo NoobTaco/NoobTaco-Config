@@ -1,4 +1,12 @@
 # Changelog
+ 
+## [1.4.0] - 2026-01-11
+### Added
+- **Accessibility Improvements**: Increased the default font weight for all UI components to improve readability for users with poor eyesight.
+    - Updated `Normal` font weight from `Regular` to `Medium`.
+    - Updated `Bold` font weight from `SemiBold` to `Bold`.
+    - Added `ExtraBold` variant for future emphasis options.
+- **New Font Assets**: Integrated `Poppins-Medium.ttf`, `Poppins-Bold.ttf`, and `Poppins-ExtraBold.ttf` into the library's media assets.
 
 ## [1.3.2] - 2026-01-11
 ### Added

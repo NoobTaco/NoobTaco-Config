@@ -17,7 +17,7 @@
 
 - 🛠️ **Declarative Schemas**: Define your entire UI layout in nested Lua tables.
 - 🎨 **Dynamic Theming**: Built-in support for **NoobTaco**, **Nord**, and **Catppuccin** themes.
-- 🔡 **Modern Typography**: Integrated with the **Poppins** font family for a sleek look.
+- 🔡 **Accessible Typography**: Integrated with the **Poppins** font family using optimized weights (**Medium**, **Bold**) for maximum readability.
 - ⚡ **Transactional State**: Built-in commit/revert logic for user settings.
 - 🌈 **Inline Color Tokens**: Use `|ctoken|` (e.g., `|chighlight|`) to dynamically style text based on the active theme.
 - 📁 **Nested Data**: Native support for dot-notation in IDs to map directly to complex SavedVariables.
