@@ -1,5 +1,12 @@
 # Changelog
  
+## [1.4.1] - 2026-01-13
+### Added
+- **Dynamic Dropdowns**: Added support for passing multiple return values (functions) to `dropdown` widget options, allowing for dynamic option lists that resolve at runtime.
+
+### Fixed
+- **Cheat Sheet Formatting**: Fixed Markdown table rendering issues in `CHEAT_SHEET.md` to ensure correct display on GitHub.
+
 ## [1.4.0] - 2026-01-11
 ### Added
 - **Accessibility Improvements**: Increased the default font weight for all UI components to improve readability for users with poor eyesight.
