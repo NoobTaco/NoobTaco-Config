@@ -1,6 +1,6 @@
 # NoobTaco-Config
 
-[![CI](https://github.com/NoobTaco/NoobTaco-Config/actions/workflows/ci.yml/badge.svg)](https://github.com/NoobTaco/NoobTaco-Config/actions/workflows/ci.yml) [![Release](https://github.com/NoobTaco/NoobTaco-Config/actions/workflows/release.yml/badge.svg)](https://github.com/NoobTaco/NoobTaco-Config/actions/workflows/release.yml)
+[![CI Status](https://img.shields.io/github/actions/workflow/status/NoobTaco/NoobTaco-Config/ci.yml?style=for-the-badge&logo=github&logoColor=white&label=CI%20Status)](https://github.com/NoobTaco/NoobTaco-Config/actions/workflows/ci.yml) [![Release Status](https://img.shields.io/github/actions/workflow/status/NoobTaco/NoobTaco-Config/release.yml?style=for-the-badge&logo=github&logoColor=white&label=Release%20Status)](https://github.com/NoobTaco/NoobTaco-Config/actions/workflows/release.yml) [![Discord](https://img.shields.io/badge/Discord-Taco%20Labs-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/Mby5KwkCH9)
 
 **NoobTaco-Config** is a modular, schema-driven configuration framework for World of Warcraft addons. Designed with a focus on "pixel-perfect" aesthetics and ease of use, it allows developers to build complex, themed options menus using simple Lua tables.
 
@@ -90,6 +90,12 @@ The library supports instant theme switching. All colors, including inline token
 
 - [Configuration Cheat Sheet](https://github.com/NoobTaco/NoobTaco-Config/blob/main/docs/CHEAT_SHEET.md) - All available containers and elements.
 - [API Reference](https://github.com/NoobTaco/NoobTaco-Config/blob/main/docs/API_REFERENCE.md) - Detailed technical documentation.
+
+## ❤️ Support
+
+If you're looking for help, have questions, or want to join the community, join us on Discord!
+
+[![Discord](https://img.shields.io/badge/Discord-Taco%20Labs-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/Mby5KwkCH9)
 
 ## 📄 License
 This project is licensed under the GPL-3.0-or-later License - see the [LICENSE](LICENSE) file for details.
