@@ -97,5 +97,10 @@ If you're looking for help, have questions, or want to join the community, join 
 
 [![Discord](https://img.shields.io/badge/Discord-Taco%20Labs-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/Mby5KwkCH9) [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Donate-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/devnoobtaco)
 
+## 📄 AI Usage
+
+See [AI_USAGE.md](https://github.com/NoobTaco/NoobTaco-Config/blob/main/AI_USAGE.md) for more information.
+
 ## 📄 License
+
 This project is licensed under the GPL-3.0-or-later License - see the [LICENSE](LICENSE) file for details.
