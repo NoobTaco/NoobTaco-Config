@@ -1,5 +1,9 @@
 # Changelog
- 
+
+## [1.4.2] - 2026-01-20
+### Fixed
+- **Renderer Robustness**: Implemented a `Resolve` helper in `Internal/Renderer.lua` to safely handle dynamic configuration fields (options, children, links) that may be passed as functions, preventing "table expected, got function" errors in `ipairs` loops.
+
 ## [1.4.1] - 2026-01-13
 ### Added
 - **Dynamic Dropdowns**: Added support for passing multiple return values (functions) to `dropdown` widget options, allowing for dynamic option lists that resolve at runtime.
