@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.4.3] - 2026-02-11
+
+### 🛠 Improvements
+*   Updated TOC for the latest WoW client.
+
 ## [1.4.2] - 2026-01-20
 ### Fixed
 - **Renderer Robustness**: Implemented a `Resolve` helper in `Internal/Renderer.lua` to safely handle dynamic configuration fields (options, children, links) that may be passed as functions, preventing "table expected, got function" errors in `ipairs` loops.
